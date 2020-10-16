@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -28,6 +28,7 @@ cd skia
 # switch to a stable branch
 echo "Checking out stable branch $SKIA_STABLE_BRANCH"
 git checkout $SKIA_STABLE_BRANCH
+git pull origin $SKIA_STABLE_BRANCH
 
 python tools/git-sync-deps
 bin/gn gen out/Static --args=" \
@@ -61,5 +62,18 @@ bin/gn gen out/Static --args=" \
     skia_use_libpng_encode = true \
     skia_use_libpng_decode = true \
     "
-ninja -C out/Static
+# ninja -C out/Static
 cd ..
+
+# copy the output
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    rm -f ./precompiled_libs/linux/*
+    mkdir -p ./precompiled_libs/linux
+    cp skia/out/Static/*.a ./precompiled_libs/linux
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    rm -f ./precompiled_libs/mac/*
+    mkdir -p ./precompiled_libs/mac
+    cp skia/out/Static/*.a ./precompiled_libs/mac
+else
+    echo Unknown platform: $OSTYPE
+fi

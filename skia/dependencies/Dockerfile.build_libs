@@ -1,0 +1,30 @@
+# To build the image, use:
+# docker build -f Dockerfile.build_libs --tag skia_builder:1.0 .
+#
+# To run the container, use:
+# docker run -it -v$(pwd)/precompiled_libs/linux:/app/precompiled_libs/linux --rm --name skia_builder skia_builder:1.0
+
+FROM google/dart
+
+RUN apt update && apt-get -y install unzip zip clang cmake ninja-build pkg-config libgtk-3-dev xvfb cargo wget g++ lsof bash
+
+# Install premake 
+RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha15/premake-5.0.0-alpha15-linux.tar.gz
+RUN tar -xvf premake-5.0.0-alpha15-linux.tar.gz
+RUN mv premake5 /usr/bin/
+
+# Setup env variables for rive-cpp compilation
+ENV LDFLAGS="-pthreads"
+ENV CC=/usr/bin/clang
+ENV CXX=/usr/bin/clang++
+
+# Add skia build script
+ADD ./make_skia.sh /app/make_skia.sh
+
+# Add the Skia repo so it doesn't have to go through the pain of cloning
+ADD ./skia /app/skia
+
+WORKDIR /app
+
+# ENTRYPOINT ["mv", "/app/skia/out/Static/*.a", "/output"]
+ENTRYPOINT ["./make_skia.sh"]
