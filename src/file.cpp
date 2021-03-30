@@ -161,7 +161,7 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 	}
 
 	auto numArtboards = reader.readVarUint();
-	for (int i = 0; i < numArtboards; i++)
+	for (unsigned i = 0; i < numArtboards; i++)
 	{
 		auto numObjects = reader.readVarUint();
 		if (numObjects == 0)
@@ -181,7 +181,7 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 
 		artboard->addObject(artboard);
 
-		for (int i = 1; i < numObjects; i++)
+		for (unsigned i = 1; i < numObjects; i++)
 		{
 			auto object = readRuntimeObject(reader, header);
 			// N.B. we add objects that don't load (null) too as we need to
@@ -192,7 +192,7 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 		// Animations also need to reference objects, so make sure they get
 		// read in before the hierarchy resolves (batch add completes).
 		auto numAnimations = reader.readVarUint();
-		for (int i = 0; i < numAnimations; i++)
+		for (unsigned i = 0; i < numAnimations; i++)
 		{
 			auto animation = readRuntimeObject<Animation>(reader, header);
 			if (animation == nullptr)
@@ -205,7 +205,7 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 				auto linearAnimation =
 				    reinterpret_cast<LinearAnimation*>(animation);
 				auto numKeyedObjects = reader.readVarUint();
-				for (int j = 0; j < numKeyedObjects; j++)
+				for (unsigned j = 0; j < numKeyedObjects; j++)
 				{
 					auto keyedObject =
 					    readRuntimeObject<KeyedObject>(reader, header);
@@ -227,7 +227,7 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 						keyedObject->addKeyedProperty(keyedProperty);
 
 						auto numKeyframes = reader.readVarUint();
-						for (int l = 0; l < numKeyframes; l++)
+						for (unsigned l = 0; l < numKeyframes; l++)
 						{
 							auto keyframe =
 							    readRuntimeObject<KeyFrame>(reader, header);

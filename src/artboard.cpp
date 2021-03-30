@@ -298,7 +298,7 @@ void Artboard::addAnimation(Animation* object)
 
 Core* Artboard::resolve(int id) const
 {
-	if (id < 0 || id >= m_Objects.size())
+	if (id < 0 || id >= static_cast<int>(m_Objects.size()))
 	{
 		return nullptr;
 	}
@@ -365,7 +365,7 @@ bool Artboard::updateComponents()
 				// If the update changed the dirt depth by adding dirt to
 				// something before us (in the DAG), early out and re-run
 				// the update.
-				if (m_DirtDepth < i)
+				if (m_DirtDepth < (unsigned int) i)
 				{
 					// We put this in here just to know if we need to keep
 					// this around...
