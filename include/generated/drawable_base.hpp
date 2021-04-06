@@ -10,11 +10,11 @@ namespace rive
 		typedef Node Super;
 
 	public:
-		static const int typeKey = 13;
+		static const uint16_t typeKey = 13;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -29,12 +29,14 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int blendModeValuePropertyKey = 23;
+		static const uint16_t blendModeValuePropertyKey = 23;
+		static const uint16_t drawableFlagsPropertyKey = 129;
 
 	private:
 		int m_BlendModeValue = 3;
+		int m_DrawableFlags = 0;
 	public:
 		inline int blendModeValue() const { return m_BlendModeValue; }
 		void blendModeValue(int value)
@@ -47,12 +49,26 @@ namespace rive
 			blendModeValueChanged();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		inline int drawableFlags() const { return m_DrawableFlags; }
+		void drawableFlags(int value)
+		{
+			if (m_DrawableFlags == value)
+			{
+				return;
+			}
+			m_DrawableFlags = value;
+			drawableFlagsChanged();
+		}
+
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{
 				case blendModeValuePropertyKey:
 					m_BlendModeValue = CoreUintType::deserialize(reader);
+					return true;
+				case drawableFlagsPropertyKey:
+					m_DrawableFlags = CoreUintType::deserialize(reader);
 					return true;
 			}
 			return Node::deserialize(propertyKey, reader);
@@ -60,6 +76,7 @@ namespace rive
 
 	protected:
 		virtual void blendModeValueChanged() {}
+		virtual void drawableFlagsChanged() {}
 	};
 } // namespace rive
 

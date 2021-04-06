@@ -12,11 +12,11 @@ namespace rive
 		typedef ShapePaint Super;
 
 	public:
-		static const int typeKey = 24;
+		static const uint16_t typeKey = 24;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -30,15 +30,15 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int thicknessPropertyKey = 47;
-		static const int capPropertyKey = 48;
-		static const int joinPropertyKey = 49;
-		static const int transformAffectsStrokePropertyKey = 50;
+		static const uint16_t thicknessPropertyKey = 47;
+		static const uint16_t capPropertyKey = 48;
+		static const uint16_t joinPropertyKey = 49;
+		static const uint16_t transformAffectsStrokePropertyKey = 50;
 
 	private:
-		float m_Thickness = 1;
+		float m_Thickness = 1.0f;
 		int m_Cap = 0;
 		int m_Join = 0;
 		bool m_TransformAffectsStroke = true;
@@ -90,7 +90,7 @@ namespace rive
 			transformAffectsStrokeChanged();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{

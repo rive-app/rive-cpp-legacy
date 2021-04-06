@@ -130,13 +130,13 @@ class Definition {
     code.writeln('protected:');
     code.writeln('typedef $superTypeName Super;');
     code.writeln('public:');
-    code.writeln('static const int typeKey = ${_key.intValue};\n');
+    code.writeln('static const uint16_t typeKey = ${_key.intValue};\n');
 
     code.write(comment(
         'Helper to quickly determine if a core object extends another '
         'without RTTI at runtime.',
         indent: 1));
-    code.writeln('bool isTypeOf(int typeKey) const override {');
+    code.writeln('bool isTypeOf(uint16_t typeKey) const override {');
 
     code.writeln('switch(typeKey) {');
     code.writeln('case ${_name}Base::typeKey:');
@@ -148,10 +148,10 @@ class Definition {
 
     code.writeln('}\n');
 
-    code.writeln('int coreType() const override { return typeKey; }\n');
+    code.writeln('uint16_t coreType() const override { return typeKey; }\n');
     if (properties.isNotEmpty) {
       for (final property in properties) {
-        code.writeln('static const int ${property.name}PropertyKey = '
+        code.writeln('static const uint16_t ${property.name}PropertyKey = '
             '${property.key.intValue};');
       }
       code.writeln('private:');
@@ -160,9 +160,11 @@ class Definition {
       for (final property in properties) {
         code.writeln('${property.type.cppName} m_${property.capitalizedName}');
 
-        var initialize = property.initialValue ?? property.type.defaultValue;
+        var initialize = property.initialValueRuntime ??
+            property.initialValue ??
+            property.type.defaultValue;
         if (initialize != null) {
-          code.write(' = $initialize');
+          code.write(' = ${property.type.convertCpp(initialize)}');
         }
         code.write(';');
       }
@@ -189,7 +191,7 @@ class Definition {
     }
 
     if (properties.isNotEmpty || _extensionOf == null) {
-      code.writeln('bool deserialize(int propertyKey, '
+      code.writeln('bool deserialize(uint16_t propertyKey, '
           'BinaryReader& reader) override {');
 
       code.writeln('switch (propertyKey){');

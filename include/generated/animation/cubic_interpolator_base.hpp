@@ -10,11 +10,11 @@ namespace rive
 		typedef Core Super;
 
 	public:
-		static const int typeKey = 28;
+		static const uint16_t typeKey = 28;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -25,18 +25,18 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int x1PropertyKey = 63;
-		static const int y1PropertyKey = 64;
-		static const int x2PropertyKey = 65;
-		static const int y2PropertyKey = 66;
+		static const uint16_t x1PropertyKey = 63;
+		static const uint16_t y1PropertyKey = 64;
+		static const uint16_t x2PropertyKey = 65;
+		static const uint16_t y2PropertyKey = 66;
 
 	private:
-		float m_X1 = 0.42;
-		float m_Y1 = 0;
-		float m_X2 = 0.58;
-		float m_Y2 = 1;
+		float m_X1 = 0.42f;
+		float m_Y1 = 0.0f;
+		float m_X2 = 0.58f;
+		float m_Y2 = 1.0f;
 	public:
 		inline float x1() const { return m_X1; }
 		void x1(float value)
@@ -82,7 +82,7 @@ namespace rive
 			y2Changed();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{

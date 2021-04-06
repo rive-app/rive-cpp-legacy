@@ -10,11 +10,11 @@ namespace rive
 		typedef Polygon Super;
 
 	public:
-		static const int typeKey = 52;
+		static const uint16_t typeKey = 52;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -32,13 +32,12 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int innerRadiusPropertyKey = 127;
+		static const uint16_t innerRadiusPropertyKey = 127;
 
 	private:
-		float m_InnerRadius = 0.5;
-
+		float m_InnerRadius = 0.5f;
 	public:
 		inline float innerRadius() const { return m_InnerRadius; }
 		void innerRadius(float value)
@@ -51,7 +50,7 @@ namespace rive
 			innerRadiusChanged();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{

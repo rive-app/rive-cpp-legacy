@@ -10,11 +10,11 @@ namespace rive
 		typedef KeyFrame Super;
 
 	public:
-		static const int typeKey = 50;
+		static const uint16_t typeKey = 50;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -26,12 +26,12 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int valuePropertyKey = 122;
+		static const uint16_t valuePropertyKey = 122;
 
 	private:
-		int m_Value = 0;
+		int m_Value = -1;
 	public:
 		inline int value() const { return m_Value; }
 		void value(int value)
@@ -44,7 +44,7 @@ namespace rive
 			valueChanged();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{

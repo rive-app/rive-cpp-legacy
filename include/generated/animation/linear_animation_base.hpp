@@ -12,11 +12,11 @@ namespace rive
 		typedef Animation Super;
 
 	public:
-		static const int typeKey = 31;
+		static const uint16_t typeKey = 31;
 
 		/// Helper to quickly determine if a core object extends another without
 		/// RTTI at runtime.
-		bool isTypeOf(int typeKey) const override
+		bool isTypeOf(uint16_t typeKey) const override
 		{
 			switch (typeKey)
 			{
@@ -28,23 +28,23 @@ namespace rive
 			}
 		}
 
-		int coreType() const override { return typeKey; }
+		uint16_t coreType() const override { return typeKey; }
 
-		static const int fpsPropertyKey = 56;
-		static const int durationPropertyKey = 57;
-		static const int speedPropertyKey = 58;
-		static const int loopValuePropertyKey = 59;
-		static const int workStartPropertyKey = 60;
-		static const int workEndPropertyKey = 61;
-		static const int enableWorkAreaPropertyKey = 62;
+		static const uint16_t fpsPropertyKey = 56;
+		static const uint16_t durationPropertyKey = 57;
+		static const uint16_t speedPropertyKey = 58;
+		static const uint16_t loopValuePropertyKey = 59;
+		static const uint16_t workStartPropertyKey = 60;
+		static const uint16_t workEndPropertyKey = 61;
+		static const uint16_t enableWorkAreaPropertyKey = 62;
 
 	private:
 		int m_Fps = 60;
 		int m_Duration = 60;
-		float m_Speed = 1;
+		float m_Speed = 1.0f;
 		int m_LoopValue = 0;
-		int m_WorkStart = 0;
-		int m_WorkEnd = 0;
+		int m_WorkStart = -1;
+		int m_WorkEnd = -1;
 		bool m_EnableWorkArea = false;
 	public:
 		inline int fps() const { return m_Fps; }
@@ -124,7 +124,7 @@ namespace rive
 			enableWorkAreaChanged();
 		}
 
-		bool deserialize(int propertyKey, BinaryReader& reader) override
+		bool deserialize(uint16_t propertyKey, BinaryReader& reader) override
 		{
 			switch (propertyKey)
 			{

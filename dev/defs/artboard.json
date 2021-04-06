@@ -8,6 +8,7 @@
   "properties": {
     "width": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 7,
         "string": "w"
@@ -16,6 +17,7 @@
     },
     "height": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 8,
         "string": "h"
@@ -24,6 +26,7 @@
     },
     "x": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 9,
         "string": "x"
@@ -32,6 +35,7 @@
     },
     "y": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 10,
         "string": "y"
@@ -40,6 +44,7 @@
     },
     "originX": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 11,
         "string": "ox"
@@ -48,11 +53,23 @@
     },
     "originY": {
       "type": "double",
+      "initialValue": "0",
       "key": {
         "int": 12,
         "string": "oy"
       },
       "description": "Origin y in normalized coordinates (0.5 = center, 0 = top, 1 = bottom)."
+    },
+    "editingAnimation": {
+      "type": "Id",
+      "initialValue": "Core.missingId",
+      "key": {
+        "int": 131,
+        "string": "editinganimation"
+      },
+      "description": "Id of the last open animation.",
+      "runtime": false,
+      "coop": false
     }
   }
 }

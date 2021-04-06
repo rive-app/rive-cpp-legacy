@@ -1,5 +1,8 @@
 #include "animation/linear_animation.hpp"
 #include "animation/keyed_object.hpp"
+#include "artboard.hpp"
+#include "importers/artboard_importer.hpp"
+#include "importers/import_stack.hpp"
 
 using namespace rive;
 
@@ -23,6 +26,7 @@ StatusCode LinearAnimation::onAddedDirty(CoreContext* context)
 	}
 	return StatusCode::Ok;
 }
+
 StatusCode LinearAnimation::onAddedClean(CoreContext* context)
 {
 	StatusCode code;
@@ -47,4 +51,16 @@ void LinearAnimation::apply(Artboard* artboard, float time, float mix)
 	{
 		object->apply(artboard, time, mix);
 	}
+}
+
+StatusCode LinearAnimation::import(ImportStack& importStack)
+{
+	auto artboardImporter =
+	    importStack.latest<ArtboardImporter>(ArtboardBase::typeKey);
+	if (artboardImporter == nullptr)
+	{
+		return StatusCode::MissingObject;
+	}
+	artboardImporter->addAnimation(this);
+	return Super::import(importStack);
 }

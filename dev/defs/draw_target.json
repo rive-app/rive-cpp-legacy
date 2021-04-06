@@ -9,6 +9,8 @@
     "drawableId": {
       "type": "Id",
       "typeRuntime": "uint",
+      "initialValue": "Core.missingId",
+      "initialValueRuntime": "-1",
       "key": {
         "int": 119,
         "string": "drawableid"

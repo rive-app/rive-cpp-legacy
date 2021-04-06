@@ -8,6 +8,7 @@
   "properties": {
     "dependentIds": {
       "type": "List<Id>",
+      "initialValue": "[]",
       "key": {
         "int": 3,
         "string": "dependentIds"
@@ -17,16 +18,18 @@
     },
     "name": {
       "type": "String",
+      "initialValue": "''",
       "key": {
         "int": 4,
         "string": "name"
       },
-      "description": "Non-unique identifier, used to give friendly names to elements in the hierarchy. Runtimes provide an API for finding components by this [name].",
-      "nullable": true
+      "description": "Non-unique identifier, used to give friendly names to elements in the hierarchy. Runtimes provide an API for finding components by this [name]."
     },
     "parentId": {
       "type": "Id",
       "typeRuntime": "uint",
+      "initialValue": "Core.missingId",
+      "initialValueRuntime": "0",
       "key": {
         "int": 5,
         "string": "parentId"
@@ -35,11 +38,22 @@
     },
     "childOrder": {
       "type": "FractionalIndex",
+      "initialValue": "FractionalIndex.invalid",
+      "initialValueRuntime": "0",
       "key": {
         "int": 6,
         "string": "childOrder"
       },
       "description": "Order value for sorting child elements in ContainerComponent parent.",
+      "runtime": false
+    },
+    "flags": {
+      "type": "uint",
+      "initialValue": "0",
+      "key": {
+        "int": 130,
+        "string": "flags"
+      },
       "runtime": false
     }
   }

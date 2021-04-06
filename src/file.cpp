@@ -5,14 +5,19 @@
 #include "core/field_types/core_string_type.hpp"
 #include "core/field_types/core_uint_type.hpp"
 #include "generated/core_registry.hpp"
+#include "importers/artboard_importer.hpp"
+#include "importers/import_stack.hpp"
+#include "importers/keyed_object_importer.hpp"
+#include "importers/keyed_property_importer.hpp"
+#include "importers/linear_animation_importer.hpp"
 
 // Default namespace for Rive Cpp code
 using namespace rive;
 
 // Import a single Rive runtime object.
 // Used by the file importer.
-template <typename T = Core>
-static T* readRuntimeObject(BinaryReader& reader, const RuntimeHeader& header)
+static Core* readRuntimeObject(BinaryReader& reader,
+                               const RuntimeHeader& header)
 {
 	auto coreObjectKey = reader.readVarUint();
 	auto object = CoreRegistry::makeCoreInstance((int)coreObjectKey);
@@ -69,47 +74,15 @@ static T* readRuntimeObject(BinaryReader& reader, const RuntimeHeader& header)
 			}
 		}
 	}
-
-	// This is evaluated at compile time based on how the templated method
-	// is called. This means that it'll get optimized out when calling with
-	// type Core (which is the default). The type checking is skipped in
-	// this case.
-	if constexpr (!std::is_same<T, Core>::value)
-	{
-		// Concrete Core object couldn't be read.
-		if (object == nullptr)
-		{
-			fprintf(stderr,
-			        "Expected object of type %d but found %llu, which this "
-			        "runtime doesn't understand.\n",
-			        T::typeKey,
-			        coreObjectKey);
-			return nullptr;
-		}
-		// Ensure the object is of the provided type, if not, return null
-		// and delete the object. Note that we read in the properties
-		// regardless of whether or not this object is the expected one.
-		// This ensures our reader has advanced past the object.
-		if (!object->is<T>())
-		{
-			fprintf(stderr,
-			        "Expected object of type %d but found %d.\n",
-			        T::typeKey,
-			        object->coreType());
-			delete object;
-			return nullptr;
-		}
-	}
-	// Core object couldn't be read.
-	else if (object == nullptr)
+	if (object == nullptr)
 	{
 		fprintf(stderr,
-		        "Expected a Core object but found %llu, which this runtime "
-		        "doesn't understand.\n",
+		        "File contains an unknown object with coreType %llu, which "
+		        "this runtime doesn't understand.\n",
 		        coreObjectKey);
 		return nullptr;
 	}
-	return reinterpret_cast<T*>(object);
+	return object;
 }
 
 File::~File()
@@ -130,7 +103,7 @@ ImportResult File::import(BinaryReader& reader, File** importedFile)
 		fprintf(stderr, "Bad header\n");
 		return ImportResult::malformed;
 	}
-	if (header.majorVersion() > majorVersion)
+	if (header.majorVersion() != majorVersion)
 	{
 		fprintf(stderr,
 		        "Unsupported version %u.%u expected %u.%u.\n",
@@ -153,103 +126,73 @@ ImportResult File::import(BinaryReader& reader, File** importedFile)
 
 ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 {
-	m_Backboard = readRuntimeObject<Backboard>(reader, header);
-	if (m_Backboard == nullptr)
+	ImportStack importStack;
+	while (!reader.reachedEnd())
 	{
-		fprintf(stderr, "Expected first object to be the backboard.\n");
-		return ImportResult::malformed;
-	}
-
-	auto numArtboards = reader.readVarUint();
-	for (unsigned i = 0; i < numArtboards; i++)
-	{
-		auto numObjects = reader.readVarUint();
-		if (numObjects == 0)
+		auto object = readRuntimeObject(reader, header);
+		if (object == nullptr)
 		{
-			fprintf(stderr,
-			        "Artboards must contain at least one object "
-			        "(themselves).\n");
-			return ImportResult::malformed;
-		}
-		auto artboard = readRuntimeObject<Artboard>(reader, header);
-		if (artboard == nullptr)
-		{
-			fprintf(stderr, "Found non-artboard in artboard list.\n");
-			return ImportResult::malformed;
-		}
-		m_Artboards.push_back(artboard);
-
-		artboard->addObject(artboard);
-
-		for (unsigned i = 1; i < numObjects; i++)
-		{
-			auto object = readRuntimeObject(reader, header);
-			// N.B. we add objects that don't load (null) too as we need to
-			// look them up by index.
-			artboard->addObject(object);
-		}
-
-		// Animations also need to reference objects, so make sure they get
-		// read in before the hierarchy resolves (batch add completes).
-		auto numAnimations = reader.readVarUint();
-		for (unsigned i = 0; i < numAnimations; i++)
-		{
-			auto animation = readRuntimeObject<Animation>(reader, header);
-			if (animation == nullptr)
+			// See if there's an artboard on the stack, need to track the null
+			// object as it'll still hold an id.
+			auto importer =
+			    importStack.latest<ArtboardImporter>(Artboard::typeKey);
+			if (importer == nullptr)
 			{
-				continue;
+				return ImportResult::malformed;
 			}
-			artboard->addAnimation(animation);
-			if (animation->coreType() == LinearAnimationBase::typeKey)
+			importer->addComponent(object);
+			continue;
+		}
+		ImportStackObject* stackObject = nullptr;
+		auto stackType = object->coreType();
+
+		switch (stackType)
+		{
+			case Artboard::typeKey:
+				stackObject = new ArtboardImporter(object->as<Artboard>());
+				break;
+			case LinearAnimation::typeKey:
+				stackObject =
+				    new LinearAnimationImporter(object->as<LinearAnimation>());
+				break;
+			case KeyedObject::typeKey:
+				stackObject =
+				    new KeyedObjectImporter(object->as<KeyedObject>());
+				break;
+			case KeyedProperty::typeKey:
 			{
-				auto linearAnimation =
-				    reinterpret_cast<LinearAnimation*>(animation);
-				auto numKeyedObjects = reader.readVarUint();
-				for (unsigned j = 0; j < numKeyedObjects; j++)
+				auto importer = importStack.latest<LinearAnimationImporter>(
+				    LinearAnimation::typeKey);
+				if (importer == nullptr)
 				{
-					auto keyedObject =
-					    readRuntimeObject<KeyedObject>(reader, header);
-					if (keyedObject == nullptr)
-					{
-						continue;
-					}
-					linearAnimation->addKeyedObject(keyedObject);
-
-					int numKeyedProperties = (int)reader.readVarUint();
-					for (int k = 0; k < numKeyedProperties; k++)
-					{
-						auto keyedProperty =
-						    readRuntimeObject<KeyedProperty>(reader, header);
-						if (keyedProperty == nullptr)
-						{
-							continue;
-						}
-						keyedObject->addKeyedProperty(keyedProperty);
-
-						auto numKeyframes = reader.readVarUint();
-						for (unsigned l = 0; l < numKeyframes; l++)
-						{
-							auto keyframe =
-							    readRuntimeObject<KeyFrame>(reader, header);
-							if (keyframe == nullptr)
-							{
-								continue;
-							}
-							keyframe->computeSeconds(linearAnimation->fps());
-							keyedProperty->addKeyFrame(keyframe);
-						}
-					}
+					return ImportResult::malformed;
 				}
+				stackObject = new KeyedPropertyImporter(
+				    importer->animation(), object->as<KeyedProperty>());
+				break;
 			}
 		}
-
-		// Artboard has been read in.
-		if (artboard->initialize() != StatusCode::Ok)
+		if (importStack.makeLatest(stackType, stackObject) != StatusCode::Ok)
 		{
+			// Some previous stack item didn't resolve.
 			return ImportResult::malformed;
 		}
+		if (object->import(importStack) == StatusCode::Ok)
+		{
+			switch (object->coreType())
+			{
+				case Backboard::typeKey:
+					m_Backboard = object->as<Backboard>();
+					break;
+				case Artboard::typeKey:
+					m_Artboards.push_back(object->as<Artboard>());
+					break;
+			}
+		}
 	}
-	return ImportResult::success;
+
+	return importStack.resolve() == StatusCode::Ok ? ImportResult::success
+	                                               : ImportResult::malformed;
 }
 
 Backboard* File::backboard() const { return m_Backboard; }
