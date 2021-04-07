@@ -373,14 +373,14 @@ bool Artboard::updateComponents()
 	{
 		const int maxSteps = 100;
 		int step = 0;
-		int count = (int)m_DependencyOrder.size();
+		auto count = m_DependencyOrder.size();
 		while (hasDirt(ComponentDirt::Components) && step < maxSteps)
 		{
 			// m_Dirt = m_Dirt & ~ComponentDirt::Components;
 
 			// Track dirt depth here so that if something else marks
 			// dirty, we restart.
-			for (int i = 0; i < count; i++)
+			for (unsigned int i = 0; i < count; i++)
 			{
 				auto component = m_DependencyOrder[i];
 				m_DirtDepth = i;
@@ -395,7 +395,7 @@ bool Artboard::updateComponents()
 				// If the update changed the dirt depth by adding dirt to
 				// something before us (in the DAG), early out and re-run
 				// the update.
-				if (m_DirtDepth < (unsigned int) i)
+				if (m_DirtDepth < i)
 				{
 					// We put this in here just to know if we need to keep
 					// this around...
