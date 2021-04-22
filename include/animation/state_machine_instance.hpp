@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stddef.h>
+#include "animation/linear_animation_instance.hpp"
 
 namespace rive
 {
@@ -56,10 +57,15 @@ namespace rive
 		// previous advance.
 		size_t stateChangedCount() const;
 
-		// Returns the state name for states that changed in layers on the
+		// Returns the layer state for states that changed in layers on the
 		// previously called advance. If the index of out of range, it returns
 		// the empty string.
 		const LayerState* stateChangedByIndex(size_t index) const;
+
+		// Returns the animation instance for layers that have changed states on
+		// the previous advance. Returns nullptr for states with no animation,
+		// i.e. start, end, any.
+		const LinearAnimationInstance* animationChangedByIndex(size_t index) const;
 
 	};
 } // namespace rive
