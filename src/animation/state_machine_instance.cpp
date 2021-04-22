@@ -406,16 +406,16 @@ const LayerState* StateMachineInstance::stateChangedByIndex(size_t index) const
 	return nullptr;
 }
 
-const LinearAnimationInstance* StateMachineInstance::animationChangedByIndex(size_t index) const
+const LinearAnimation* StateMachineInstance::animationChangedByIndex(size_t index) const
 {
 	size_t count = 0;
 	for (int i = 0; i < m_LayerCount; i++)
 	{
 		if (m_Layers[i].stateChangedOnAdvance())
 		{
-			if (count == index)
+			if (count == index && m_Layers[i].currentAnimationInstance() != nullptr)
 			{
-				return m_Layers[i].currentAnimationInstance();
+				return m_Layers[i].currentAnimationInstance()->animation();
 			}
 			count++;
 		} 

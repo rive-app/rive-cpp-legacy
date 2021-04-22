@@ -65,7 +65,7 @@ namespace rive
 		// Returns the animation instance for layers that have changed states on
 		// the previous advance. Returns nullptr for states with no animation,
 		// i.e. start, end, any.
-		const LinearAnimationInstance* animationChangedByIndex(size_t index) const;
+		const LinearAnimation* animationChangedByIndex(size_t index) const;
 
 	};
 } // namespace rive
