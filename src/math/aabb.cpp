@@ -105,3 +105,38 @@ void AABB::transform(AABB& out, const AABB& a, const Mat2D& matrix)
 	out[2] = std::fmax(p1[0], std::fmax(p2[0], std::fmax(p3[0], p4[0])));
 	out[3] = std::fmax(p1[1], std::fmax(p2[1], std::fmax(p3[1], p4[1])));
 }
+
+void AABB::expandTo(AABB& out, const Vec2D& point)
+{
+	float x = point[0];
+	float y = point[1];
+	expandTo(out, x, y);
+}
+
+void AABB::expandTo(AABB& out, float x, float y)
+{
+	if (x < out.minX)
+	{
+		out.minX = x;
+	}
+	if (x > out.maxX)
+	{
+		out.maxX = x;
+	}
+	if (y < out.minY)
+	{
+		out.minY = y;
+	}
+	if (y > out.maxY)
+	{
+		out.maxY = y;
+	}
+}
+
+void AABB::copy(AABB& out, const AABB& a)
+{
+	out[0] = a[0];
+	out[1] = a[1];
+	out[2] = a[2];
+	out[3] = a[3];
+}

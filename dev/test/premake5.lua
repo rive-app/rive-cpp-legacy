@@ -31,7 +31,7 @@ files {"../../src/**.cpp", -- the Rive runtime source
 "../../test/**.cpp" -- the tests
 }
 
-defines {"TESTING", "ENABLE_QUERY_FLAT_VERTICES"}
+defines {"TESTING", "ENABLE_QUERY_FLAT_VERTICES", "LOW_LEVEL_RENDERING", "CONTOUR_RECURSIVE"}
 
 filter "configurations:debug"
 defines {"DEBUG"}

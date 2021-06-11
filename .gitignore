@@ -71,3 +71,4 @@ skia/**/build/bin
 /skia/dependencies/libzip
 /skia/dependencies/libzip_build
 /skia/viewer/imgui.ini
+/diligent/viewer/build/bin/debug/rive_diligent_viewer

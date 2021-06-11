@@ -4,6 +4,7 @@
 #include "mat2d.hpp"
 #include "vec2d.hpp"
 #include <cstddef>
+#include <limits>
 
 namespace rive
 {
@@ -38,10 +39,29 @@ namespace rive
 		static bool testOverlap(const AABB& a, const AABB& b);
 		static bool areIdentical(const AABB& a, const AABB& b);
 		static void transform(AABB& out, const AABB& a, const Mat2D& matrix);
+		static void copy(AABB& out, const AABB& a);
+
+		///
+		/// Grow the AABB to fit the point.
+		///
+		static void expandTo(AABB& out, const Vec2D& point);
+		static void expandTo(AABB& out, float x, float y);
 
 		float width() const;
 		float height() const;
 		float perimeter() const;
+
+		///
+		/// Initialize an AABB to values that represent an invalid/collapsed
+		/// AABB that can then expand to points that are added to it.
+		///
+		inline static AABB forExpansion()
+		{
+			return AABB(std::numeric_limits<float>::max(),
+			            std::numeric_limits<float>::max(),
+			            -std::numeric_limits<float>::max(),
+			            -std::numeric_limits<float>::max());
+		}
 	};
 } // namespace rive
 #endif

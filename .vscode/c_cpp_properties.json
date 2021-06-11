@@ -1,19 +1,20 @@
 {
-    "configurations": [
-        {
-            "name": "Mac",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/dev/test/include",
-                "${workspaceFolder}/include"
-            ],
-            "defines": [],
-            "macFrameworkPath": [],
-            "compilerPath": "/usr/local/bin/arm-none-eabi-gcc",
-            "cStandard": "gnu11",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "clang-x64"
-        }
-    ],
+    "configurations": [{
+        "name": "Mac",
+        "includePath": [
+            "${workspaceFolder}/**",
+            "${workspaceFolder}/dev/test/include",
+            "${workspaceFolder}/include"
+        ],
+        "defines": [
+            "LOW_LEVEL_RENDERING",
+            "CONTOUR_RECURSIVE"
+        ],
+        "macFrameworkPath": [],
+        "compilerPath": "/usr/local/bin/arm-none-eabi-gcc",
+        "cStandard": "gnu11",
+        "cppStandard": "gnu++14",
+        "intelliSenseMode": "clang-x64"
+    }],
     "version": 4
 }
