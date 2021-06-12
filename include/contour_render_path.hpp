@@ -1,4 +1,3 @@
-#ifdef LOW_LEVEL_RENDERING
 #ifndef _RIVE_CONTOUR_RENDER_PATH_HPP_
 #define _RIVE_CONTOUR_RENDER_PATH_HPP_
 
@@ -94,5 +93,4 @@ namespace rive
 		void computeContour();
 	};
 } // namespace rive
-#endif
 #endif

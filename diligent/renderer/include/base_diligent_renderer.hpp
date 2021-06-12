@@ -24,7 +24,6 @@ namespace rive
 	{
 	protected:
 		RENDER_DEVICE_TYPE m_DeviceType;
-		RefCntAutoPtr<IPipelineState> m_pPSO;
 		RefCntAutoPtr<IEngineFactory> m_pEngineFactory;
 		RefCntAutoPtr<IRenderDevice> m_pDevice;
 		RefCntAutoPtr<IDeviceContext> m_pImmediateContext;

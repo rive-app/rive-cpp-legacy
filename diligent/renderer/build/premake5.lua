@@ -21,7 +21,7 @@ libdirs {"../../../build/bin/%{cfg.buildcfg}", "../../dependencies/skia/out/Stat
 
 files {"../src/**.cpp"}
 
-buildoptions {"-Wall"}
+buildoptions {"-Wall", "-fno-rtti"}
 
 filter "configurations:debug"
 defines {"DEBUG"}

@@ -52,7 +52,6 @@ void main(in  PSInput  PSIn,
 void ExampleDiligentRenderer::initializePipeline()
 {
 	// Pipeline state object encompasses configuration of all GPU stages
-
 	GraphicsPipelineStateCreateInfo PSOCreateInfo;
 
 	// Pipeline state name is used by the engine to report issues.

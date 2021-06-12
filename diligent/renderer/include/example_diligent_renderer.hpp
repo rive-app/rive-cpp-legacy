@@ -9,6 +9,9 @@ namespace rive
 
 	class ExampleDiligentRenderer : public BaseDiligentRenderer
 	{
+	private:
+		RefCntAutoPtr<IPipelineState> m_pPSO;
+
 	public:
 		~ExampleDiligentRenderer();
 		void save() override;

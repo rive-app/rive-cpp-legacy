@@ -12,7 +12,7 @@ elif [ "$OPTION" = "clean" ]; then
     echo Cleaning project ...
     premake5 gmake && make clean
 elif [ "$OPTION" = "release" ]; then
-    premake5 gmake && make config=release -j7
+    premake5 --with-low-level-rendering gmake && make config=release -j7
 else
-    premake5 gmake && make -j7
+    premake5 --with-low-level-rendering gmake && make -j7
 fi

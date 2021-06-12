@@ -1,29 +1,37 @@
 workspace "rive"
-    configurations {"debug", "release"}
+configurations {"debug", "release"}
 
 project "rive"
-    kind "StaticLib"
-    language "C++"
-    cppdialect "C++17"
-    targetdir "bin/%{cfg.buildcfg}"
-    objdir "obj/%{cfg.buildcfg}"
-    includedirs {"../include"}
+kind "StaticLib"
+language "C++"
+cppdialect "C++17"
+targetdir "bin/%{cfg.buildcfg}"
+objdir "obj/%{cfg.buildcfg}"
+includedirs {"../include"}
 
-    files {"../src/**.cpp"}
+files {"../src/**.cpp"}
 
-    buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
+buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
 
-    filter "system:windows"
-        defines {"_USE_MATH_DEFINES"}
+newoption {
+    trigger = "with-low-level-rendering",
+    description = "Builds in utility classes and methods used for low level renderering implementations."
+}
 
-    filter "configurations:debug"
-        defines {"DEBUG"}
-        symbols "On"
+filter "system:windows"
+defines {"_USE_MATH_DEFINES"}
 
-    filter "configurations:release"
-        defines {"RELEASE"}
-        defines {"NDEBUG"}
-        optimize "On"
+filter "configurations:debug"
+defines {"DEBUG"}
+symbols "On"
+
+filter "configurations:release"
+defines {"RELEASE"}
+defines {"NDEBUG"}
+optimize "On"
+
+configuration "with-low-level-rendering"
+defines("LOW_LEVEL_RENDERING")
 
 -- Clean Function --
 newaction {

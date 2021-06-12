@@ -9,6 +9,19 @@ namespace rive
 
 	class DiligentRenderer : public BaseDiligentRenderer
 	{
+	private:
+		/// The pipeline state for filling the stencil with contour data.
+		RefCntAutoPtr<IPipelineState> m_StencilPSO;
+
+		/// The pipeline state for covering the prepped stencil.
+		RefCntAutoPtr<IPipelineState> m_CoverPSO;
+
+		/// Constants (uniforms) for the stencil state.
+		RefCntAutoPtr<IBuffer> m_StencilConstants;
+
+		/// Shader resource binding for the shader pipeline state.
+		RefCntAutoPtr<IShaderResourceBinding> m_StencilResourceBinding;
+
 	public:
 		~DiligentRenderer();
 		void save() override;

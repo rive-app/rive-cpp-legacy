@@ -1,3 +1,8 @@
+#include "artboard.hpp"
+#include "file.hpp"
+#include "layout.hpp"
+#include "animation/linear_animation_instance.hpp"
+
 // #include "diligent_renderer.hpp"
 #include "example_diligent_renderer.hpp"
 
@@ -22,6 +27,7 @@ void debugMessageCallback(enum DEBUG_MESSAGE_SEVERITY Severity,
                           int Line)
 {
 }
+
 int main()
 {
 	if (!glfwInit())
@@ -51,6 +57,37 @@ int main()
 	fprintf(stderr, "Unknown platform.\n");
 	assert(false);
 #endif
+
+	// Load a rive file
+	uint8_t* fileBytes = nullptr;
+	unsigned int fileBytesLength = 0;
+
+	std::string filename = "assets/polygon_party.riv";
+	FILE* fp = fopen(filename.c_str(), "r");
+	fseek(fp, 0, SEEK_END);
+	fileBytesLength = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	delete[] fileBytes;
+	fileBytes = new uint8_t[fileBytesLength];
+	if (fread(fileBytes, 1, fileBytesLength, fp) != fileBytesLength)
+	{
+		delete[] fileBytes;
+		fprintf(stderr, "failed to read all of %s\n", filename.c_str());
+		return 1;
+	}
+	auto reader = rive::BinaryReader(fileBytes, fileBytesLength);
+	rive::File* file = nullptr;
+	auto result = rive::File::import(reader, &file);
+	if (result != rive::ImportResult::success)
+	{
+		delete[] fileBytes;
+		fprintf(stderr, "failed to import file\n");
+		return 1;
+	}
+
+	rive::File* currentFile = nullptr;
+	rive::Artboard* artboard = nullptr;
+	rive::LinearAnimationInstance* animationInstance = nullptr;
 
 	rive::ExampleDiligentRenderer renderer;
 	Diligent::SetDebugMessageCallback(debugMessageCallback);
