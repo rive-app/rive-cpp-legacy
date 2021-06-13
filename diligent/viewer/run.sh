@@ -1,7 +1,7 @@
 
 OPTION=$1
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../dependencies/DiligentCore-MacOS-x64-Release/lib/Release
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../dependencies/DiligentEngine_build/build/lib/DiligentCore/Debug/
 
 if [ "$OPTION" = 'help' ]; then
     echo build.sh - build debug library
@@ -10,5 +10,5 @@ if [ "$OPTION" = 'help' ]; then
 elif [ "$OPTION" = "release" ]; then
     ./build/bin/release/rive_diligent_viewer
 else
-    ./build/bin/debug/rive_diligent_viewer
+    ./build/bin/debug/rive_diligent_viewer '-mode gl'
 fi

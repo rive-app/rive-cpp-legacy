@@ -24,7 +24,9 @@ if os.host() == "macosx" then
     links {"DiligentCore", "GenericCodeGen", "glew-static", "glslang", "HLSL", "MachineIndependent", "OGLCompiler",
            "OSDependent", "spirv-cross-core", "SPIRV-Tools-opt", "SPIRV-Tools", "SPIRV", "GraphicsEngineOpenGL"}
     defines {"PLATFORM_MACOS", "GL_SUPPORTED"}
-    includedirs {"../../dependencies/DiligentEngine_build/build/include"}
+    includedirs {"../../dependencies/DiligentEngine_build/build/include/DiligentCore",
+                 "../../dependencies/DiligentEngine_build/build/include/DiligentCore/Common/interface"}
+    files {"../src/**.mm"}
 end
 
 links {"rive", "rive_diligent_renderer", "glfw3"}

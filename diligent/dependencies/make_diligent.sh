@@ -18,6 +18,6 @@ fi
 
 mkdir DiligentEngine_build
 cd DiligentEngine_build
-cmake ../DiligentEngine -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=./build
+cmake ../DiligentEngine -DCMAKE_INSTALL_PREFIX=./build
 make
 make install

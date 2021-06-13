@@ -137,4 +137,5 @@ void ExampleDiligentRenderer::render()
 	DrawAttribs drawAttrs;
 	drawAttrs.NumVertices = 3; // We will render 3 vertices
 	m_pImmediateContext->Draw(drawAttrs);
+	// m_pImmediateContext->Flush();
 }

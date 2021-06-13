@@ -1,7 +1,11 @@
 #include "base_diligent_renderer.hpp"
 
-#if PLATFORM_MACOS
+#if GL_SUPPORTED
 #include "DiligentCore/Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
+#endif
+
+#if METAL_SUPPORTED
+#include "DiligentCore/Graphics/GraphicsEngineMetal/interface/EngineFactoryMtl.h"
 #endif
 
 // Mostly from
@@ -246,8 +250,10 @@ void BaseDiligentRenderer::initialize(const NativeWindow* window)
 			EngineCI.Window = *window;
 
 			if (m_ValidationLevel >= 0)
+			{
 				EngineCI.SetValidationLevel(
 				    static_cast<VALIDATION_LEVEL>(m_ValidationLevel));
+			}
 
 			EngineCI.Features = DeviceFeatures{DEVICE_FEATURE_STATE_OPTIONAL};
 
@@ -264,6 +270,7 @@ void BaseDiligentRenderer::initialize(const NativeWindow* window)
 			NumImmediateContexts = 1;
 			ppContexts.resize(NumImmediateContexts +
 			                  EngineCI.NumDeferredContexts);
+
 			pFactoryOpenGL->CreateDeviceAndSwapChainGL(
 			    EngineCI, &m_pDevice, ppContexts.data(), SCDesc, &m_pSwapChain);
 			if (!m_pDevice)
@@ -315,7 +322,7 @@ void BaseDiligentRenderer::initialize(const NativeWindow* window)
 		case RENDER_DEVICE_TYPE_METAL:
 		{
 			EngineMtlCreateInfo MtlAttribs;
-
+			printf("OK!\n");
 			ppContexts.resize(1 + MtlAttribs.NumDeferredContexts);
 			auto* pFactoryMtl = GetEngineFactoryMtl();
 			pFactoryMtl->CreateDeviceAndContextsMtl(
