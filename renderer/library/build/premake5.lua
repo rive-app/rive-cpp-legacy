@@ -12,7 +12,9 @@ includedirs {"../include", "../../../include"}
 if os.host() == "macosx" then
     links {"Cocoa.framework", "rive"}
     defines {"PLATFORM_MACOS", "RIVE_HAS_METAL", "RIVE_HAS_OPENGL"}
+    defines {"GL_SILENCE_DEPRECATION"}
     includedirs {"../../dependencies/DiligentEngine_build/build/include"}
+    files {"../src/**.mm"}
 else
     links {"rive"}
 end

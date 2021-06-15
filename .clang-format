@@ -1,10 +1,10 @@
+---
 BasedOnStyle: LLVM
 IndentWidth: 4
 UseTab: ForIndentation
 TabWidth: 4
 BreakBeforeBraces: Allman
 IndentCaseLabels: true
-Language: Cpp
 # Force pointers to the type for C++.
 DerivePointerAlignment: false
 PointerAlignment: Left
@@ -16,7 +16,6 @@ ColumnLimit: 80
 BinPackArguments: false
 BinPackParameters: false
 AlignAfterOpenBracket: Align
-BreakBeforeBraces: Custom
 SortIncludes: false
 BraceWrapping:
   AfterEnum: true
@@ -27,9 +26,12 @@ BraceWrapping:
   AfterStruct: true
   SplitEmptyFunction: true
   AfterObjCDeclaration: true
-  AfterStruct: true
   AfterUnion: true
   AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
   AfterCaseLabel: true
+---
+Language: Cpp
+---
+Language: ObjC

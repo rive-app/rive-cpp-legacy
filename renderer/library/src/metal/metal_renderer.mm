@@ -8,3 +8,7 @@ void MetalRenderer::restore() {}
 void MetalRenderer::transform(const Mat2D& transform) {}
 void MetalRenderer::drawPath(RenderPath* path, RenderPaint* paint) {}
 void MetalRenderer::clipPath(RenderPath* path) {}
+
+void MetalRenderer::onViewportSizeChanged(ViewportSize from, ViewportSize to) {}
+void MetalRenderer::clear() {}
+void MetalRenderer::frame() {}

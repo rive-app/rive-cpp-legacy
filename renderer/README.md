@@ -18,7 +18,7 @@ Primarily for older mobile devices where OpenGL ES 2.0 is supported and more mod
 For OSX and iOS. Planned to be implemented via Objective-C for easy interop with C++.
 
 ## Vulkan
-For modern Android.
+Intended for primary use on modern Android devices and Linux.
 
 ## D3D11 and D3D12
-For Windows and Windows based systems.
+For Windows and Windows based systems (Xbox).
