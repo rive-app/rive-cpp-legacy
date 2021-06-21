@@ -15,6 +15,8 @@ namespace rive
 		GLuint m_VertexShader = 0, m_FragmentShader = 0;
 		GLuint m_Program = 0;
 		GLuint m_IndexBuffer = 0;
+		GLint m_ProjectionUniformIndex = -1;
+		GLint m_TransformUniformIndex = -1;
 		std::vector<unsigned short> m_Indices;
 
 	public:
@@ -34,6 +36,10 @@ namespace rive
 		bool initialize(void* data) override;
 
 		void updateIndexBuffer(std::size_t contourLength);
+
+		GLint transformUniformIndex() const { return m_TransformUniformIndex; }
+		GLuint program() const { return m_Program; }
+		virtual const char* shaderHeader() const { return nullptr; };
 	};
 
 } // namespace rive

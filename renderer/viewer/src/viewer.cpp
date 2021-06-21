@@ -12,7 +12,7 @@
 #include "graphics_api.hpp"
 
 // Make sure gl3w is included before glfw3
-#include "GL/gl3w.h"
+// #include "GL/gl3w.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
@@ -60,9 +60,9 @@ int main(int argc, const char** argv)
 	if (graphicsApi == rive::GraphicsApi::opengl)
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-		// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	}
 	else
 	{
@@ -107,6 +107,7 @@ int main(int argc, const char** argv)
 	unsigned int fileBytesLength = 0;
 
 	std::string filename = "assets/polygon_party.riv";
+	// std::string filename = "assets/triangle.riv";
 	FILE* fp = fopen(filename.c_str(), "r");
 	fseek(fp, 0, SEEK_END);
 	fileBytesLength = ftell(fp);
@@ -150,6 +151,7 @@ int main(int argc, const char** argv)
 	{
 		int width = 0, height = 0;
 		glfwGetFramebufferSize(window, &width, &height);
+
 		if (lastWidth != width || lastHeight != height)
 		{
 			lastWidth = width;

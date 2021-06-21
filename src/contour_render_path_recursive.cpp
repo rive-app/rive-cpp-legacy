@@ -62,6 +62,7 @@ public:
 		}
 		m_IsPenDown = true;
 		Vec2D::copy(m_PenDown, m_Pen);
+		addVertex(m_PenDown);
 	}
 
 	inline void close()
@@ -72,6 +73,10 @@ public:
 		}
 		Vec2D::copy(m_Pen, m_PenDown);
 		m_IsPenDown = false;
+
+		// TODO: Can we optimize and not dupe this point if it's the last point
+		// already in the list? For example: a procedural triangle closes itself
+		// with a lineTo the first point.
 		addVertex(m_PenDown);
 	}
 
@@ -103,7 +108,7 @@ public:
 				addVertex(Vec2D(CubicUtilities::cubicAt(
 				                    t2, from[0], fromOut[0], toIn[0], to[0]),
 				                CubicUtilities::cubicAt(
-				                    t2, from[1], fromOut[1], toIn[1], to[0])));
+				                    t2, from[1], fromOut[1], toIn[1], to[1])));
 			}
 		}
 	}
@@ -136,6 +141,7 @@ void ContourRenderPath::computeContour()
 				                       command.point(),
 				                       0.0f,
 				                       1.0f);
+				// segmenter.addVertex(command.point());
 				segmenter.pen(command.point());
 				break;
 			case PathCommandType::close:
@@ -149,7 +155,6 @@ void ContourRenderPath::computeContour()
 
 	// TODO: consider if there's a case with no points.
 	Vec2D& first = m_ContourVertices[0];
-
 	AABB::copy(m_ContourBounds, segmenter.bounds());
 	first[0] = m_ContourBounds.minX;
 	first[1] = m_ContourBounds.minY;

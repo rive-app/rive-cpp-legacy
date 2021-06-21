@@ -73,3 +73,4 @@ skia/**/build/bin
 /skia/viewer/imgui.ini
 /diligent/viewer/build/bin/debug/rive_diligent_viewer
 /build/obj
+/renderer/viewer/build/bin/debug/rive_low_level_viewer

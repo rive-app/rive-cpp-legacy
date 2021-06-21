@@ -2,6 +2,7 @@
 #define _RIVE_OPENGL_RENDER_PATH_HPP_
 
 #include "contour_render_path.hpp"
+#include "opengl.h"
 
 namespace rive
 {

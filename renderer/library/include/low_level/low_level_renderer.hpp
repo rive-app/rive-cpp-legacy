@@ -27,7 +27,7 @@ namespace rive
 	/// OpenGL, Vulkan, D3D, etc.
 	class LowLevelRenderer : public Renderer
 	{
-	private:
+	protected:
 		float m_ModelViewProjection[16] = {0.0f};
 		std::list<RenderState> m_Stack;
 

@@ -19,12 +19,14 @@ OpenGLRenderer::~OpenGLRenderer()
 
 bool OpenGLRenderer::initialize(void* data)
 {
+	fprintf(stderr, "init opengl\n");
 	assert(m_VertexShader == 0 && m_FragmentShader == 0 && m_Program == 0);
 
 	m_VertexShader =
 	    createAndCompileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	if (m_VertexShader == 0)
 	{
+		fprintf(stderr, "init opengl no 1");
 		return false;
 	}
 
@@ -32,6 +34,7 @@ bool OpenGLRenderer::initialize(void* data)
 	    createAndCompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 	if (m_FragmentShader == 0)
 	{
+		fprintf(stderr, "init opengl no 2");
 		return false;
 	}
 
@@ -55,6 +58,21 @@ bool OpenGLRenderer::initialize(void* data)
 	// Create index buffer which we'll grow and populate as necessary.
 	glGenBuffers(1, &m_IndexBuffer);
 
+	// TODO: CLEANUP
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	printf("VAO: %i\n", vao);
+	glUseProgram(m_Program);
+
+	m_ProjectionUniformIndex = glGetUniformLocation(m_Program, "projection");
+	m_TransformUniformIndex = glGetUniformLocation(m_Program, "transform");
+	GLint position = glGetAttribLocation(m_Program, "position");
+	fprintf(stderr, "POSITION: %i\n", position);
+	float projection[16] = {0.0f};
+	orthographicProjection(projection, 0.0f, 800, 800, 0.0f, 0.0f, 1.0f);
+	modelViewProjection(projection);
+
 	return true;
 }
 
@@ -65,6 +83,7 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 	{
 		return;
 	}
+
 	auto glPath = static_cast<OpenGLRenderPath*>(path);
 	glPath->stencil(this, transform());
 }
@@ -73,8 +92,12 @@ void OpenGLRenderer::clipPath(RenderPath* path) {}
 
 void OpenGLRenderer::startFrame()
 {
-	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	// glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+	// glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(m_Program);
+	glEnableVertexAttribArray(0);
+	glUniformMatrix4fv(
+	    m_ProjectionUniformIndex, 1, GL_FALSE, m_ModelViewProjection);
 }
 
 void OpenGLRenderer::endFrame() {}
@@ -95,6 +118,7 @@ void OpenGLRenderer::updateIndexBuffer(std::size_t contourLength)
 	auto targetEdgeCount = contourLength - 2;
 	if (edgeCount < targetEdgeCount)
 	{
+
 		while (edgeCount < targetEdgeCount)
 		{
 			m_Indices.push_back(0);

@@ -49,6 +49,7 @@ void LowLevelRenderer::restore()
 
 void LowLevelRenderer::transform(const Mat2D& transform)
 {
-	Mat2D::copy(m_Stack.back().transform, transform);
+	Mat2D& stackMat = m_Stack.back().transform;
+	Mat2D::multiply(stackMat, stackMat, transform);
 }
 const Mat2D& LowLevelRenderer::transform() { return m_Stack.back().transform; }
