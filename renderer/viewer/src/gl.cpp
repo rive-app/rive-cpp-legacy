@@ -2,6 +2,16 @@
 #include "opengl/opengl_renderer.hpp"
 namespace rive
 {
-	LowLevelRenderer* makeRendererOpenGL() { return new OpenGLRenderer(); }
+	class ViewerGLRenderer : public OpenGLRenderer
+	{
+	public:
+		void startFrame() override
+		{
+			glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			OpenGLRenderer::startFrame();
+		}
+	};
+	LowLevelRenderer* makeRendererOpenGL() { return new ViewerGLRenderer(); }
 } // namespace rive
 #endif

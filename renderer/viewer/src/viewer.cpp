@@ -63,6 +63,7 @@ int main(int argc, const char** argv)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_SAMPLES, 16);
 	}
 	else
 	{
@@ -76,8 +77,6 @@ int main(int argc, const char** argv)
 		fprintf(stderr, "Failed to create window.\n");
 		return -1;
 	}
-
-	void* windowHandle = nullptr;
 
 #ifdef __APPLE__
 	glfwMakeContextCurrent(window);

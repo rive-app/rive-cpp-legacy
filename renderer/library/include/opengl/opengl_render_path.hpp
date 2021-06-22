@@ -20,6 +20,7 @@ namespace rive
 		FillRule fillRule() const { return m_FillRule; }
 
 		void stencil(OpenGLRenderer* renderer, const Mat2D& transform);
+		void cover(OpenGLRenderer* renderer, const Mat2D& transform);
 	};
 } // namespace rive
 #endif

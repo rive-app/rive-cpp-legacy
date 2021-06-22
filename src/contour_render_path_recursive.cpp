@@ -119,7 +119,13 @@ void ContourRenderPath::computeContour()
 	m_IsDirty = false;
 	assert(m_ContourVertices.empty());
 	RecursiveCubicSegmenter segmenter(&m_ContourVertices, m_ContourThreshold);
+
+	// First four vertices are the bounds.
 	m_ContourVertices.emplace_back(Vec2D());
+	m_ContourVertices.emplace_back(Vec2D());
+	m_ContourVertices.emplace_back(Vec2D());
+	m_ContourVertices.emplace_back(Vec2D());
+
 	for (rive::PathCommand& command : m_Commands)
 	{
 		switch (command.type())
@@ -154,9 +160,21 @@ void ContourRenderPath::computeContour()
 	segmenter.close();
 
 	// TODO: consider if there's a case with no points.
-	Vec2D& first = m_ContourVertices[0];
 	AABB::copy(m_ContourBounds, segmenter.bounds());
+	Vec2D& first = m_ContourVertices[0];
 	first[0] = m_ContourBounds.minX;
 	first[1] = m_ContourBounds.minY;
+
+	Vec2D& second = m_ContourVertices[1];
+	second[0] = m_ContourBounds.maxX;
+	second[1] = m_ContourBounds.minY;
+
+	Vec2D& third = m_ContourVertices[2];
+	third[0] = m_ContourBounds.maxX;
+	third[1] = m_ContourBounds.maxY;
+
+	Vec2D& fourth = m_ContourVertices[3];
+	fourth[0] = m_ContourBounds.minX;
+	fourth[1] = m_ContourBounds.maxY;
 }
 #endif

@@ -23,6 +23,7 @@ if os.host() == "macosx" then
     links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "Metal.framework", "QuartzCore.framework",
            "OpenGL.framework", "glfw3"}
     defines {"RIVE_HAS_OPENGL", "RIVE_HAS_METAL"}
+    defines {"GL_SILENCE_DEPRECATION"}
     includedirs {"%{DEPENDENCIES_DIR}/include/gl3w"}
     files {"../src/**.mm"}
 end

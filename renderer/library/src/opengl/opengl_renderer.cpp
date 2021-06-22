@@ -15,18 +15,17 @@ OpenGLRenderer::~OpenGLRenderer()
 	glDeleteShader(m_VertexShader);
 	glDeleteShader(m_FragmentShader);
 	glDeleteBuffers(1, &m_IndexBuffer);
+	glDeleteVertexArrays(1, &m_VertexArray);
 }
 
 bool OpenGLRenderer::initialize(void* data)
 {
-	fprintf(stderr, "init opengl\n");
 	assert(m_VertexShader == 0 && m_FragmentShader == 0 && m_Program == 0);
 
 	m_VertexShader =
 	    createAndCompileShader(GL_VERTEX_SHADER, vertexShaderSource);
 	if (m_VertexShader == 0)
 	{
-		fprintf(stderr, "init opengl no 1");
 		return false;
 	}
 
@@ -34,7 +33,6 @@ bool OpenGLRenderer::initialize(void* data)
 	    createAndCompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 	if (m_FragmentShader == 0)
 	{
-		fprintf(stderr, "init opengl no 2");
 		return false;
 	}
 
@@ -57,18 +55,29 @@ bool OpenGLRenderer::initialize(void* data)
 
 	// Create index buffer which we'll grow and populate as necessary.
 	glGenBuffers(1, &m_IndexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 
-	// TODO: CLEANUP
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	printf("VAO: %i\n", vao);
+	// Two triangles for bounds.
+	m_Indices.emplace_back(0);
+	m_Indices.emplace_back(1);
+	m_Indices.emplace_back(2);
+	m_Indices.emplace_back(2);
+	m_Indices.emplace_back(3);
+	m_Indices.emplace_back(0);
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+	             m_Indices.size() * sizeof(unsigned short),
+	             &m_Indices[0],
+	             GL_STATIC_DRAW);
+
+	glGenVertexArrays(1, &m_VertexArray);
+	glBindVertexArray(m_VertexArray);
+
 	glUseProgram(m_Program);
 
 	m_ProjectionUniformIndex = glGetUniformLocation(m_Program, "projection");
 	m_TransformUniformIndex = glGetUniformLocation(m_Program, "transform");
-	GLint position = glGetAttribLocation(m_Program, "position");
-	fprintf(stderr, "POSITION: %i\n", position);
+
 	float projection[16] = {0.0f};
 	orthographicProjection(projection, 0.0f, 800, 800, 0.0f, 0.0f, 1.0f);
 	modelViewProjection(projection);
@@ -85,19 +94,34 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 	}
 
 	auto glPath = static_cast<OpenGLRenderPath*>(path);
+
+	// Set up stencil buffer.
+	glStencilMask(0xFF);
+	glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+	glColorMask(false, false, false, false);
+	glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+
 	glPath->stencil(this, transform());
+
+	glColorMask(true, true, true, true);
+	glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+	glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+
+	glPath->cover(this, transform());
 }
 
 void OpenGLRenderer::clipPath(RenderPath* path) {}
 
 void OpenGLRenderer::startFrame()
 {
-	// glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
-	// glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(m_Program);
 	glEnableVertexAttribArray(0);
 	glUniformMatrix4fv(
 	    m_ProjectionUniformIndex, 1, GL_FALSE, m_ModelViewProjection);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void OpenGLRenderer::endFrame() {}
@@ -114,22 +138,21 @@ void OpenGLRenderer::updateIndexBuffer(std::size_t contourLength)
 	{
 		return;
 	}
-	auto edgeCount = m_Indices.size() / 3;
+	auto edgeCount = (m_Indices.size() - 6) / 3;
 	auto targetEdgeCount = contourLength - 2;
 	if (edgeCount < targetEdgeCount)
 	{
-
 		while (edgeCount < targetEdgeCount)
 		{
-			m_Indices.push_back(0);
-			m_Indices.push_back(edgeCount + 1);
-			m_Indices.push_back(edgeCount + 2);
+			m_Indices.push_back(3);
+			m_Indices.push_back(edgeCount + 4);
+			m_Indices.push_back(edgeCount + 5);
 			edgeCount++;
 		}
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		             edgeCount * 3 * sizeof(unsigned short),
+		             m_Indices.size() * sizeof(unsigned short),
 		             &m_Indices[0],
 		             GL_STATIC_DRAW);
 	}

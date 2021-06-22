@@ -17,6 +17,10 @@ namespace rive
 		GLuint m_IndexBuffer = 0;
 		GLint m_ProjectionUniformIndex = -1;
 		GLint m_TransformUniformIndex = -1;
+		GLuint m_VertexArray = 0;
+
+		/// Indices for the max sized contour, prepended with 2 triangles for
+		/// bounding boxes.
 		std::vector<unsigned short> m_Indices;
 
 	public:

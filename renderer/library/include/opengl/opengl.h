@@ -9,8 +9,6 @@
 #include <OpenGLES/ES2/glext.h>
 #else
 #include <OpenGL/gl3.h>
-#include <OpenGL/glu.h>
-#include <OpenGL/glext.h>
 #endif
 #elif defined(__ANDROID__) || defined(ANDROID)
 #include <GLES2/gl2.h>
