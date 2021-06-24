@@ -2,6 +2,7 @@
 
 #include "contour_render_path.hpp"
 #include "math/cubic_utilities.hpp"
+#include <cassert>
 
 using namespace rive;
 
