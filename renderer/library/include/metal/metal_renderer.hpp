@@ -25,13 +25,12 @@ namespace rive
 		void drawPath(RenderPath* path, RenderPaint* paint) override;
 		void clipPath(RenderPath* path) override;
 
-		void onViewportSizeChanged(ViewportSize from, ViewportSize to) override;
 		void startFrame() override;
 		void endFrame() override;
 
 		RenderPaint* makeRenderPaint() override;
 		RenderPath* makeRenderPath() override;
-		bool initialize() override;
+		bool initialize(void* data) override;
 
 		virtual id<MTLDevice> acquireDevice() = 0;
 		virtual id<MTLRenderCommandEncoder> currentCommandEncoder() = 0;

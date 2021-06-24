@@ -32,6 +32,7 @@ optimize "On"
 
 configuration "with-low-level-rendering"
 defines("LOW_LEVEL_RENDERING")
+defines("CONTOUR_RECURSIVE")
 
 -- Clean Function --
 newaction {

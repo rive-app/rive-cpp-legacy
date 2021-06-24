@@ -60,9 +60,9 @@ int main(int argc, const char** argv)
 	if (graphicsApi == rive::GraphicsApi::opengl)
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		// glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	}
 	else
 	{
@@ -144,33 +144,44 @@ int main(int argc, const char** argv)
 	}
 
 	double lastTime = glfwGetTime();
+	int lastWidth = 0, lastHeight = 0;
+	float projection[16] = {0.0f};
 	while (!glfwWindowShouldClose(window))
 	{
 		int width = 0, height = 0;
 		glfwGetFramebufferSize(window, &width, &height);
-		renderer->viewportSize(rive::ViewportSize(width, height));
+		if (lastWidth != width || lastHeight != height)
+		{
+			lastWidth = width;
+			lastHeight = height;
+			renderer->orthographicProjection(
+			    projection, 0.0f, width, height, 0.0f, 0.0f, 1.0f);
+			renderer->modelViewProjection(projection);
+		}
 
 		double time = glfwGetTime();
 		float elapsed = (float)(time - lastTime);
 		lastTime = time;
 
 		renderer->startFrame();
-		// if (artboard != nullptr)
-		// {
-		// 	if (animationInstance != nullptr)
-		// 	{
-		// 		animationInstance->advance(elapsed);
-		// 		animationInstance->apply(artboard);
-		// 	}
-		// 	artboard->advance(elapsed);
-		// 	renderer.save();
-		// 	renderer.align(rive::Fit::contain,
-		// 	               rive::Alignment::center,
-		// 	               rive::AABB(0, 0, width, height),
-		// 	               artboard->bounds());
-		// 	artboard->draw(&renderer);
-		// 	renderer.restore();
-		// }
+
+		if (artboard != nullptr)
+		{
+			if (animationInstance != nullptr)
+			{
+				animationInstance->advance(elapsed);
+				animationInstance->apply(artboard);
+			}
+			artboard->advance(elapsed);
+			renderer->save();
+			renderer->align(rive::Fit::contain,
+			                rive::Alignment::center,
+			                rive::AABB(0, 0, width, height),
+			                artboard->bounds());
+			artboard->draw(renderer);
+			renderer->restore();
+		}
+
 		renderer->endFrame();
 
 #if __APPLE__

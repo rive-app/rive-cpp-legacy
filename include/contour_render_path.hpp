@@ -71,7 +71,7 @@ namespace rive
 	///
 	class ContourRenderPath : public RenderPath
 	{
-	private:
+	protected:
 		AABB m_ContourBounds;
 		std::vector<Vec2D> m_ContourVertices;
 		std::vector<ContourSubPath> m_SubPaths;
@@ -80,6 +80,7 @@ namespace rive
 		float m_ContourThreshold = 1.0f;
 
 	public:
+		std::size_t contourLength() const { return m_ContourVertices.size(); }
 		bool isContainer() const;
 		void addRenderPath(RenderPath* path, const Mat2D& transform) override;
 
@@ -91,6 +92,7 @@ namespace rive
 		void close() override;
 
 		void computeContour();
+		bool isDirty() const { return m_IsDirty; }
 	};
 } // namespace rive
 #endif

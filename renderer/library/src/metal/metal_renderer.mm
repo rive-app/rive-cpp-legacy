@@ -10,7 +10,6 @@ void MetalRenderer::transform(const Mat2D& transform) {}
 void MetalRenderer::drawPath(RenderPath* path, RenderPaint* paint) {}
 void MetalRenderer::clipPath(RenderPath* path) {}
 
-void MetalRenderer::onViewportSizeChanged(ViewportSize from, ViewportSize to) {}
 void MetalRenderer::startFrame() {}
 void MetalRenderer::endFrame() {}
 
@@ -44,7 +43,7 @@ static const char kShaderSource[] =
     "    return out;\n"
     "}\n";
 
-bool MetalRenderer::initialize()
+bool MetalRenderer::initialize(void* data)
 {
 	auto metalDevice = acquireDevice();
 

@@ -3,33 +3,23 @@
 
 #include "renderer.hpp"
 #include "graphics_api.hpp"
+#include "math/mat2d.hpp"
 #include <stdint.h>
+#include <list>
 
 namespace rive
 {
-	class ViewportSize
+	struct SubPath
 	{
-	private:
-		uint16_t m_Width = 0;
-		uint16_t m_Height = 0;
-
-	public:
-		ViewportSize();
-		ViewportSize(uint16_t width, uint16_t height);
-
-		uint16_t width() const { return m_Width; }
-		uint16_t height() const { return m_Height; }
+		RenderPath* path;
+		Mat2D transform;
 	};
 
-	inline bool operator==(const ViewportSize& lhs, const ViewportSize& rhs)
+	struct RenderState
 	{
-		return lhs.width() == rhs.width() && lhs.height() == lhs.height();
-	}
-
-	inline bool operator!=(const ViewportSize& lhs, const ViewportSize& rhs)
-	{
-		return lhs.width() != rhs.width() || lhs.height() != lhs.height();
-	}
+		Mat2D transform;
+		std::list<SubPath> clipPaths;
+	};
 
 	///
 	/// Low level implementation of a generalized rive::Renderer. It's
@@ -38,22 +28,35 @@ namespace rive
 	class LowLevelRenderer : public Renderer
 	{
 	private:
-		ViewportSize m_ViewportSize;
+		float m_ModelViewProjection[16] = {0.0f};
+		std::list<RenderState> m_Stack;
 
 	public:
+		LowLevelRenderer();
 		virtual GraphicsApi::Type type() const = 0;
-		void viewportSize(const ViewportSize& size);
-		const ViewportSize& viewportSize() { return m_ViewportSize; }
-
-		virtual void onViewportSizeChanged(ViewportSize from,
-		                                   ViewportSize to) = 0;
 
 		virtual void startFrame() = 0;
 		virtual void endFrame() = 0;
 
 		virtual RenderPaint* makeRenderPaint() = 0;
 		virtual RenderPath* makeRenderPath() = 0;
-		virtual bool initialize() = 0;
+		virtual bool initialize(void* data) = 0;
+		bool initialize() { return initialize(nullptr); }
+
+		void modelViewProjection(float value[16]);
+
+		virtual void orthographicProjection(float dst[16],
+		                                    float left,
+		                                    float right,
+		                                    float bottom,
+		                                    float top,
+		                                    float near,
+		                                    float far);
+
+		void save() override;
+		void restore() override;
+		void transform(const Mat2D& transform) override;
+		const Mat2D& transform();
 	};
 
 } // namespace rive
