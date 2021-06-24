@@ -32,6 +32,8 @@ namespace rive
 			result[5] = 0.0f;
 		}
 
+		static const Mat2D& identity();
+
 		static void fromRotation(Mat2D& result, float rad);
 		static void scale(Mat2D& result, const Mat2D& mat, const Vec2D& vec);
 		static void multiply(Mat2D& result, const Mat2D& a, const Mat2D& b);

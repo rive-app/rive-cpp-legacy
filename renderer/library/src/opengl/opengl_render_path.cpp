@@ -15,10 +15,10 @@ void OpenGLRenderPath::stencil(OpenGLRenderer* renderer, const Mat2D& transform)
 	{
 		for (auto& subPath : m_SubPaths)
 		{
-			Mat2D subPathTransform;
-			Mat2D::multiply(subPathTransform, transform, subPath.transform());
+			Mat2D pathTransform;
+			Mat2D::multiply(pathTransform, transform, subPath.transform());
 			reinterpret_cast<OpenGLRenderPath*>(subPath.path())
-			    ->stencil(renderer, subPathTransform);
+			    ->stencil(renderer, pathTransform);
 		}
 		return;
 	}
@@ -108,16 +108,19 @@ void OpenGLRenderPath::stencil(OpenGLRenderer* renderer, const Mat2D& transform)
 	// glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, &indices[0]);
 }
 
-void OpenGLRenderPath::cover(OpenGLRenderer* renderer, const Mat2D& transform)
+void OpenGLRenderPath::cover(OpenGLRenderer* renderer,
+                             const Mat2D& transform,
+                             const Mat2D& localTransform)
 {
 	if (isContainer())
 	{
 		for (auto& subPath : m_SubPaths)
 		{
-			Mat2D subPathTransform;
-			Mat2D::multiply(subPathTransform, transform, subPath.transform());
+			const Mat2D& subPathTransform = subPath.transform();
+			Mat2D pathTransform;
+			Mat2D::multiply(pathTransform, transform, subPathTransform);
 			reinterpret_cast<OpenGLRenderPath*>(subPath.path())
-			    ->stencil(renderer, subPathTransform);
+			    ->cover(renderer, pathTransform, subPathTransform);
 		}
 		return;
 	}
@@ -130,26 +133,47 @@ void OpenGLRenderPath::cover(OpenGLRenderer* renderer, const Mat2D& transform)
 		return;
 	}
 
-	auto triangleCount = vertexCount - 5;
+	{
+		float m4[16] = {transform[0],
+		                transform[1],
+		                0.0,
+		                0.0,
+		                transform[2],
+		                transform[3],
+		                0.0,
+		                0.0,
+		                0.0,
+		                0.0,
+		                1.0,
+		                0.0,
+		                transform[4],
+		                transform[5],
+		                0.0,
+		                1.0};
 
-	float m4[16] = {transform[0],
-	                transform[1],
-	                0.0,
-	                0.0,
-	                transform[2],
-	                transform[3],
-	                0.0,
-	                0.0,
-	                0.0,
-	                0.0,
-	                1.0,
-	                0.0,
-	                transform[4],
-	                transform[5],
-	                0.0,
-	                1.0};
+		glUniformMatrix4fv(renderer->transformUniformIndex(), 1, GL_FALSE, m4);
+	}
+	{
+		float m4[16] = {localTransform[0],
+		                localTransform[1],
+		                0.0,
+		                0.0,
+		                localTransform[2],
+		                localTransform[3],
+		                0.0,
+		                0.0,
+		                0.0,
+		                0.0,
+		                1.0,
+		                0.0,
+		                localTransform[4],
+		                localTransform[5],
+		                0.0,
+		                1.0};
 
-	glUniformMatrix4fv(renderer->transformUniformIndex(), 1, GL_FALSE, m4);
+		glUniformMatrix4fv(
+		    renderer->shapeTransformUniformIndex(), 1, GL_FALSE, m4);
+	}
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * 4, (void*)0);

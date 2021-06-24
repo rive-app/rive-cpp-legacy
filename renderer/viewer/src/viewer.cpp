@@ -105,8 +105,9 @@ int main(int argc, const char** argv)
 	uint8_t* fileBytes = nullptr;
 	unsigned int fileBytesLength = 0;
 
-	std::string filename = "assets/polygon_party.riv";
+	// std::string filename = "assets/polygon_party.riv";
 	// std::string filename = "assets/triangle.riv";
+	std::string filename = "assets/juice.riv";
 	FILE* fp = fopen(filename.c_str(), "r");
 	fseek(fp, 0, SEEK_END);
 	fileBytesLength = ftell(fp);

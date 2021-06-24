@@ -17,6 +17,13 @@ namespace rive
 		GLuint m_IndexBuffer = 0;
 		GLint m_ProjectionUniformIndex = -1;
 		GLint m_TransformUniformIndex = -1;
+		GLint m_FillTypeUniformIndex = -1;
+		GLint m_StopCountUniformIndex = -1;
+		GLint m_StopColorsUniformIndex = -1;
+		GLint m_ColorUniformIndex = -1;
+		GLint m_StopsUniformIndex = -1;
+		GLint m_GradientPositionUniformIndex = -1;
+		GLint m_ShapeTransformUniformIndex = -1;
 		GLuint m_VertexArray = 0;
 
 		/// Indices for the max sized contour, prepended with 2 triangles for
@@ -42,6 +49,24 @@ namespace rive
 		void updateIndexBuffer(std::size_t contourLength);
 
 		GLint transformUniformIndex() const { return m_TransformUniformIndex; }
+
+		GLint fillTypeUniformIndex() const { return m_FillTypeUniformIndex; }
+		GLint stopCountUniformIndex() const { return m_StopCountUniformIndex; }
+		GLint stopColorsUniformIndex() const
+		{
+			return m_StopColorsUniformIndex;
+		}
+		GLint colorUniformIndex() const { return m_ColorUniformIndex; }
+		GLint stopsUniformIndex() const { return m_StopsUniformIndex; }
+		GLint shapeTransformUniformIndex() const
+		{
+			return m_ShapeTransformUniformIndex;
+		}
+		GLint gradientPositionUniformIndex() const
+		{
+			return m_GradientPositionUniformIndex;
+		}
+
 		GLuint program() const { return m_Program; }
 		virtual const char* shaderHeader() const { return nullptr; };
 	};

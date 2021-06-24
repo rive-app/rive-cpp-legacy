@@ -3,6 +3,7 @@
 
 #include "contour_render_path.hpp"
 #include "opengl.h"
+#include "math/mat2d.hpp"
 
 namespace rive
 {
@@ -20,7 +21,9 @@ namespace rive
 		FillRule fillRule() const { return m_FillRule; }
 
 		void stencil(OpenGLRenderer* renderer, const Mat2D& transform);
-		void cover(OpenGLRenderer* renderer, const Mat2D& transform);
+		void cover(OpenGLRenderer* renderer,
+		           const Mat2D& transform,
+		           const Mat2D& localTransform = Mat2D::identity());
 	};
 } // namespace rive
 #endif

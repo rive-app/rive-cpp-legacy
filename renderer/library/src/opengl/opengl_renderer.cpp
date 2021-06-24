@@ -78,6 +78,16 @@ bool OpenGLRenderer::initialize(void* data)
 	m_ProjectionUniformIndex = glGetUniformLocation(m_Program, "projection");
 	m_TransformUniformIndex = glGetUniformLocation(m_Program, "transform");
 
+	m_FillTypeUniformIndex = glGetUniformLocation(m_Program, "fillType");
+	m_StopCountUniformIndex = glGetUniformLocation(m_Program, "count");
+	m_StopColorsUniformIndex = glGetUniformLocation(m_Program, "colors");
+	m_StopsUniformIndex = glGetUniformLocation(m_Program, "stops");
+	m_ColorUniformIndex = glGetUniformLocation(m_Program, "color");
+	m_GradientPositionUniformIndex =
+	    glGetUniformLocation(m_Program, "position");
+	m_ShapeTransformUniformIndex =
+	    glGetUniformLocation(m_Program, "localTransform");
+
 	float projection[16] = {0.0f};
 	orthographicProjection(projection, 0.0f, 800, 800, 0.0f, 0.0f, 1.0f);
 	modelViewProjection(projection);
@@ -88,7 +98,7 @@ bool OpenGLRenderer::initialize(void* data)
 void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 {
 	auto glPaint = static_cast<OpenGLRenderPaint*>(paint);
-	if (glPaint->style() == RenderPaintStyle::stroke)
+	if (glPaint->style() == RenderPaintStyle::stroke || !glPaint->doesDraw())
 	{
 		return;
 	}
@@ -108,7 +118,8 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 	glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 	glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
-	glPath->cover(this, transform());
+	glPaint->draw(this, transform(), glPath);
+	// glPath->cover(this, transform());
 }
 
 void OpenGLRenderer::clipPath(RenderPath* path) {}
