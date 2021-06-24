@@ -48,8 +48,8 @@ namespace rive
 		virtual void onViewportSizeChanged(ViewportSize from,
 		                                   ViewportSize to) = 0;
 
-		virtual void clear() = 0;
-		virtual void frame() = 0;
+		virtual void startFrame() = 0;
+		virtual void endFrame() = 0;
 
 		virtual RenderPaint* makeRenderPaint() = 0;
 		virtual RenderPath* makeRenderPath() = 0;

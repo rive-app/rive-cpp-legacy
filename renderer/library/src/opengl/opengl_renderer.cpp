@@ -22,8 +22,8 @@ void OpenGLRenderer::onViewportSizeChanged(ViewportSize from, ViewportSize to)
 {
 }
 
-void OpenGLRenderer::clear() { glClear(GL_COLOR_BUFFER_BIT); }
-void OpenGLRenderer::frame() {}
+void OpenGLRenderer::startFrame() { glClear(GL_COLOR_BUFFER_BIT); }
+void OpenGLRenderer::endFrame() {}
 
 RenderPaint* OpenGLRenderer::makeRenderPaint()
 {

@@ -26,18 +26,23 @@ namespace rive
 		void clipPath(RenderPath* path) override;
 
 		void onViewportSizeChanged(ViewportSize from, ViewportSize to) override;
-		void clear() override;
-		void frame() override;
+		void startFrame() override;
+		void endFrame() override;
 
 		RenderPaint* makeRenderPaint() override;
 		RenderPath* makeRenderPath() override;
 		bool initialize() override;
 
 		virtual id<MTLDevice> acquireDevice() = 0;
+		virtual id<MTLRenderCommandEncoder> currentCommandEncoder() = 0;
 
 	private:
 		id<MTLBuffer> m_FillScreenVertexBuffer;
 		id<MTLRenderPipelineState> m_Pipeline;
+		id<MTLDepthStencilState> m_DepthStencil;
+
+	protected:
+		void fillScreen();
 	};
 
 } // namespace rive

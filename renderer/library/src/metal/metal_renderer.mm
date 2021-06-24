@@ -11,8 +11,8 @@ void MetalRenderer::drawPath(RenderPath* path, RenderPaint* paint) {}
 void MetalRenderer::clipPath(RenderPath* path) {}
 
 void MetalRenderer::onViewportSizeChanged(ViewportSize from, ViewportSize to) {}
-void MetalRenderer::clear() {}
-void MetalRenderer::frame() {}
+void MetalRenderer::startFrame() {}
+void MetalRenderer::endFrame() {}
 
 RenderPaint* MetalRenderer::makeRenderPaint() { return new MetalRenderPaint(); }
 RenderPath* MetalRenderer::makeRenderPath() { return new MetalRenderPath(); }
@@ -98,6 +98,12 @@ bool MetalRenderer::initialize()
 		error = nil;
 	}
 
+	MTLDepthStencilDescriptor* depthDesc =
+	    [[MTLDepthStencilDescriptor alloc] init];
+	depthDesc.depthCompareFunction = MTLCompareFunctionAlways;
+	depthDesc.depthWriteEnabled = false;
+	m_DepthStencil = [metalDevice newDepthStencilStateWithDescriptor:depthDesc];
+
 	float fillScreenVertices[] = {1.0f,
 	                              1.0f,
 
@@ -114,4 +120,16 @@ bool MetalRenderer::initialize()
 	                             length:sizeof(fillScreenVertices)
 	                            options:MTLResourceOptionCPUCacheModeDefault];
 	return true;
+}
+
+void MetalRenderer::fillScreen()
+{
+	auto encoder = currentCommandEncoder();
+	[encoder setRenderPipelineState:m_Pipeline];
+	[encoder setVertexBuffer:m_FillScreenVertexBuffer offset:0 atIndex:0];
+
+	[encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip
+	            vertexStart:0
+	            vertexCount:4
+	          instanceCount:1];
 }

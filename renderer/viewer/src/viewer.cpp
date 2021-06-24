@@ -154,7 +154,7 @@ int main(int argc, const char** argv)
 		float elapsed = (float)(time - lastTime);
 		lastTime = time;
 
-		renderer->clear();
+		renderer->startFrame();
 		// if (artboard != nullptr)
 		// {
 		// 	if (animationInstance != nullptr)
@@ -171,7 +171,7 @@ int main(int argc, const char** argv)
 		// 	artboard->draw(&renderer);
 		// 	renderer.restore();
 		// }
-		renderer->frame();
+		renderer->endFrame();
 
 #if __APPLE__
 		glfwSwapBuffers(window);

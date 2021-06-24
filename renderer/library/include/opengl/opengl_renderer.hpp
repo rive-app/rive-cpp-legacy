@@ -19,8 +19,8 @@ namespace rive
 		void clipPath(RenderPath* path) override;
 
 		void onViewportSizeChanged(ViewportSize from, ViewportSize to) override;
-		void clear() override;
-		void frame() override;
+		void startFrame() override;
+		void endFrame() override;
 
 		RenderPaint* makeRenderPaint() override;
 		RenderPath* makeRenderPath() override;
