@@ -3,15 +3,21 @@
 
 #include "low_level/low_level_renderer.hpp"
 
-#ifdef __OBJC__
-#import <Metal/Metal.h>
+#ifndef __OBJC__
+#error MetalRenderer can only be included from Objective-C files.
 #endif
+#ifndef __clang__
+#error MetalRenderer can only be compiled with Clang.
+#endif
+
+#import <Metal/Metal.h>
 
 namespace rive
 {
 	class MetalRenderer : public LowLevelRenderer
 	{
 	public:
+		GraphicsApi::Type type() const override { return GraphicsApi::metal; }
 		~MetalRenderer();
 		void save() override;
 		void restore() override;
@@ -22,6 +28,16 @@ namespace rive
 		void onViewportSizeChanged(ViewportSize from, ViewportSize to) override;
 		void clear() override;
 		void frame() override;
+
+		RenderPaint* makeRenderPaint() override;
+		RenderPath* makeRenderPath() override;
+		bool initialize() override;
+
+		virtual id<MTLDevice> acquireDevice() = 0;
+
+	private:
+		id<MTLBuffer> m_FillScreenVertexBuffer;
+		id<MTLRenderPipelineState> m_Pipeline;
 	};
 
 } // namespace rive

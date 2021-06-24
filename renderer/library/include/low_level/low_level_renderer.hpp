@@ -2,6 +2,7 @@
 #define _RIVE_LOW_LEVEL_RENDERER_HPP_
 
 #include "renderer.hpp"
+#include "graphics_api.hpp"
 #include <stdint.h>
 
 namespace rive
@@ -30,12 +31,17 @@ namespace rive
 		return lhs.width() != rhs.width() || lhs.height() != lhs.height();
 	}
 
+	///
+	/// Low level implementation of a generalized rive::Renderer. It's
+	/// specifically tailored for use with low level graphics apis like Metal,
+	/// OpenGL, Vulkan, D3D, etc.
 	class LowLevelRenderer : public Renderer
 	{
 	private:
 		ViewportSize m_ViewportSize;
 
 	public:
+		virtual GraphicsApi::Type type() const = 0;
 		void viewportSize(const ViewportSize& size);
 		const ViewportSize& viewportSize() { return m_ViewportSize; }
 
@@ -44,6 +50,10 @@ namespace rive
 
 		virtual void clear() = 0;
 		virtual void frame() = 0;
+
+		virtual RenderPaint* makeRenderPaint() = 0;
+		virtual RenderPath* makeRenderPath() = 0;
+		virtual bool initialize() = 0;
 	};
 
 } // namespace rive

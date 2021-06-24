@@ -9,6 +9,7 @@ namespace rive
 	class OpenGLRenderer : public LowLevelRenderer
 	{
 	public:
+		GraphicsApi::Type type() const override { return GraphicsApi::opengl; }
 		OpenGLRenderer();
 		~OpenGLRenderer();
 		void save() override;
@@ -20,6 +21,11 @@ namespace rive
 		void onViewportSizeChanged(ViewportSize from, ViewportSize to) override;
 		void clear() override;
 		void frame() override;
+
+		RenderPaint* makeRenderPaint() override;
+		RenderPath* makeRenderPath() override;
+
+		bool initialize() override;
 	};
 
 } // namespace rive

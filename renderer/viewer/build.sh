@@ -1,4 +1,13 @@
 #!/bin/bash
+set -e
+
+# pushd ../../
+# ./build.sh $@
+# popd
+
+# pushd ../library
+# ./build.sh $@
+# popd
 
 cd build
 

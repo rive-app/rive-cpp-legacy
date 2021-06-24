@@ -5,37 +5,34 @@ BASE_DIR = path.getabsolute("../../../build")
 location("./")
 dofile(path.join(BASE_DIR, "premake5.lua"))
 
-BASE_DIR = path.getabsolute("../../renderer/build")
+BASE_DIR = path.getabsolute("../../library/build")
 location("./")
 dofile(path.join(BASE_DIR, "premake5.lua"))
 
-project "rive_diligent_viewer"
+DEPENDENCIES_DIR = "../../dependencies/local/";
+
+project "rive_low_level_viewer"
 kind "ConsoleApp"
 language "C++"
 cppdialect "C++17"
 targetdir "bin/%{cfg.buildcfg}"
 objdir "obj/%{cfg.buildcfg}"
-includedirs {"../include", "../../../include", "../../renderer/include", "../../dependencies/glfw/include",
-             "../../dependencies/glfw/include"}
+includedirs {"../include", "../../../include", "../../library/include", "%{DEPENDENCIES_DIR}/include"}
 
 if os.host() == "macosx" then
-    links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "OpenGL.framework"}
-    libdirs {"../../dependencies/DiligentEngine_build/build/lib/DiligentCore/Debug"}
-    links {"DiligentCore", "GenericCodeGen", "glew-static", "glslang", "HLSL", "MachineIndependent", "OGLCompiler",
-           "OSDependent", "spirv-cross-core", "SPIRV-Tools-opt", "SPIRV-Tools", "SPIRV", "GraphicsEngineOpenGL"}
-    defines {"PLATFORM_MACOS", "GL_SUPPORTED"}
-    includedirs {"../../dependencies/DiligentEngine_build/build/include/DiligentCore",
-                 "../../dependencies/DiligentEngine_build/build/include/DiligentCore/Common/interface"}
+    links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "Metal.framework", "QuartzCore.framework",
+           "OpenGL.framework", "glfw3"}
+    defines {"RIVE_HAS_OPENGL", "RIVE_HAS_METAL"}
+    includedirs {"%{DEPENDENCIES_DIR}/include/gl3w"}
     files {"../src/**.mm"}
 end
 
-links {"rive", "rive_diligent_renderer", "glfw3"}
-libdirs {"../../../build/bin/%{cfg.buildcfg}", "../../dependencies/glfw_build/src",
-         "../../renderer/build/bin/%{cfg.buildcfg}"}
+links {"rive", "rive_renderer"}
+libdirs {"../../../build/bin/%{cfg.buildcfg}", "../../library/build/bin/%{cfg.buildcfg}", "%{DEPENDENCIES_DIR}/lib"}
 
 files {"../src/**.cpp"}
 
-buildoptions {"-Wall"}
+buildoptions {"-Wall", "-fno-rtti"}
 
 filter "configurations:debug"
 defines {"DEBUG"}

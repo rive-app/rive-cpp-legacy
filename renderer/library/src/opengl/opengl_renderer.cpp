@@ -1,9 +1,17 @@
 #include "opengl/opengl_renderer.hpp"
+#include "opengl/opengl_render_path.hpp"
+#include "opengl/opengl_render_paint.hpp"
 
 using namespace rive;
 
-OpenGLRenderer::OpenGLRenderer() { glClearColor(1.0f, 0.0f, 0.0f, 1.0f); }
+OpenGLRenderer::OpenGLRenderer() {}
 OpenGLRenderer::~OpenGLRenderer() {}
+
+bool OpenGLRenderer::initialize()
+{
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+	return true;
+}
 void OpenGLRenderer::save() {}
 void OpenGLRenderer::restore() {}
 void OpenGLRenderer::transform(const Mat2D& transform) {}
@@ -16,3 +24,9 @@ void OpenGLRenderer::onViewportSizeChanged(ViewportSize from, ViewportSize to)
 
 void OpenGLRenderer::clear() { glClear(GL_COLOR_BUFFER_BIT); }
 void OpenGLRenderer::frame() {}
+
+RenderPaint* OpenGLRenderer::makeRenderPaint()
+{
+	return new OpenGLRenderPaint();
+}
+RenderPath* OpenGLRenderer::makeRenderPath() { return new OpenGLRenderPath(); }

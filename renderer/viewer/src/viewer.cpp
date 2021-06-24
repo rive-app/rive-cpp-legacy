@@ -2,94 +2,53 @@
 #include "file.hpp"
 #include "layout.hpp"
 #include "animation/linear_animation_instance.hpp"
+#include "low_level/low_level_renderer.hpp"
 #include <string.h>
 
-// #include "diligent_renderer.hpp"
-#include "example_diligent_renderer.hpp"
-
-#if PLATFORM_MACOS
-#include "DiligentCore/Graphics/GraphicsEngineOpenGL/interface/EngineFactoryOpenGL.h"
+#if __APPLE__
 #define GLFW_EXPOSE_NATIVE_COCOA
 #endif
 
+#include "graphics_api.hpp"
+
+// Make sure gl3w is included before glfw3
+#include "GL/gl3w.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
 #include <stdio.h>
 
-using namespace Diligent;
-
-RENDER_DEVICE_TYPE g_RenderDeviceType = RENDER_DEVICE_TYPE_GL;
-
-void debugMessageCallback(enum DEBUG_MESSAGE_SEVERITY Severity,
-                          const Char* Message,
-                          const Char* Function,
-                          const Char* File,
-                          int Line)
-{
-	printf("MESSAGE: %s %s %s\n", Message, Function, File);
-}
+void* viewerNativeWindowHandle = nullptr;
 
 int main(int argc, const char** argv)
 {
-	Diligent::RENDER_DEVICE_TYPE desiredDeviceType =
-	    Diligent::RENDER_DEVICE_TYPE_UNDEFINED;
-
+	auto graphicsApi = rive::GraphicsApi::unknown;
 	if (argc >= 2)
 	{
+		// Figure out if the user requested a specific Graphics API.
 		const char* deviceName = argv[1];
-		if (strcmp(deviceName, "mtl") == 0 || strcmp(deviceName, "metal") == 0)
+		if (strcmp(deviceName, "gl") == 0 || strcmp(deviceName, "opengl") == 0)
 		{
-#if METAL_SUPPORTED
-			desiredDeviceType = Diligent::RENDER_DEVICE_TYPE_METAL;
-#else
-			fprintf(stderr, "Metal is not supported.\n");
-			return 1;
-#endif
+			graphicsApi = rive::GraphicsApi::opengl;
+		}
+		else if (strcmp(deviceName, "mtl") == 0 ||
+		         strcmp(deviceName, "metal") == 0)
+		{
+			graphicsApi = rive::GraphicsApi::metal;
 		}
 		else if (strcmp(deviceName, "vk") == 0 ||
 		         strcmp(deviceName, "vulkan") == 0)
 		{
-#if VULKAN_SUPPORTED
-			desiredDeviceType = Diligent::RENDER_DEVICE_TYPE_VULKAN;
-#else
-			fprintf(stderr, "Vulkan is not supported.\n");
-			return 1;
-#endif
+			graphicsApi = rive::GraphicsApi::vulkan;
 		}
 		else if (strcmp(deviceName, "d3d11") == 0)
 		{
-#if D3D11_SUPPORTED
-			desiredDeviceType = Diligent::RENDER_DEVICE_TYPE_D3D11;
-#else
-			fprintf(stderr, "Direct3D11 is not supported.\n");
-			return 1;
-#endif
+			graphicsApi = rive::GraphicsApi::d3d11;
 		}
 		else if (strcmp(deviceName, "d3d12") == 0)
 		{
-#if D3D12_SUPPORTED
-			desiredDeviceType = Diligent::RENDER_DEVICE_TYPE_D3D12;
-#else
-			fprintf(stderr, "Direct3D12 is not supported.\n");
-			return 1;
-#endif
+			graphicsApi = rive::GraphicsApi::d3d12;
 		}
-	}
-
-	if (desiredDeviceType == RENDER_DEVICE_TYPE_UNDEFINED)
-	{
-#if METAL_SUPPORTED
-		desiredDeviceType = RENDER_DEVICE_TYPE_METAL;
-#elif VULKAN_SUPPORTED
-		desiredDeviceType = RENDER_DEVICE_TYPE_VULKAN;
-#elif D3D12_SUPPORTED
-		desiredDeviceType = RENDER_DEVICE_TYPE_D3D12;
-#elif D3D11_SUPPORTED
-		desiredDeviceType = RENDER_DEVICE_TYPE_D3D11;
-#elif GL_SUPPORTED
-		desiredDeviceType = RENDER_DEVICE_TYPE_GL;
-#endif
 	}
 
 	if (!glfwInit())
@@ -98,7 +57,7 @@ int main(int argc, const char** argv)
 		return 1;
 	}
 
-	if (desiredDeviceType == RENDER_DEVICE_TYPE_GL)
+	if (graphicsApi == rive::GraphicsApi::opengl)
 	{
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -110,8 +69,7 @@ int main(int argc, const char** argv)
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	}
 
-	GLFWwindow* window =
-	    glfwCreateWindow(640, 480, "Rive + DiligentGraphics", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(640, 480, "Rive", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -120,13 +78,29 @@ int main(int argc, const char** argv)
 	}
 
 	void* windowHandle = nullptr;
-#if PLATFORM_MACOS
+
+#ifdef __APPLE__
 	glfwMakeContextCurrent(window);
-	windowHandle = static_cast<void*>(glfwGetCocoaWindow(window));
-#else
-	fprintf(stderr, "Unknown platform.\n");
-	assert(false);
+	viewerNativeWindowHandle = static_cast<void*>(glfwGetCocoaWindow(window));
 #endif
+
+	// If no specific API requested, big the default one for the platform.
+	rive::LowLevelRenderer* renderer =
+	    graphicsApi == rive::GraphicsApi::unknown
+	        ? rive::GraphicsApi::makeRenderer()
+	        : rive::GraphicsApi::makeRenderer(graphicsApi);
+
+	if (renderer == nullptr || !renderer->initialize())
+	{
+		return 1;
+	}
+
+	char windowTitle[128];
+	snprintf(windowTitle,
+	         128,
+	         "Rive Low Level Renderer (%s)",
+	         rive::GraphicsApi::name(renderer->type()));
+	glfwSetWindowTitle(window, windowTitle);
 
 	// Load a rive file
 	uint8_t* fileBytes = nullptr;
@@ -169,30 +143,18 @@ int main(int argc, const char** argv)
 		animationInstance = new rive::LinearAnimationInstance(animation);
 	}
 
-	rive::ExampleDiligentRenderer renderer;
-	Diligent::SetDebugMessageCallback(debugMessageCallback);
-	renderer.deviceType(desiredDeviceType);
-	Diligent::NativeWindow nw{windowHandle};
-	renderer.initialize(&nw);
-	renderer.initializePipeline();
-
-	int width = 0, height = 0;
-	int lastScreenWidth = 0, lastScreenHeight = 0;
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window))
 	{
+		int width = 0, height = 0;
 		glfwGetFramebufferSize(window, &width, &height);
-		if (width != lastScreenWidth || height != lastScreenHeight)
-		{
-			renderer.resize(width, height);
-			lastScreenWidth = width;
-			lastScreenHeight = height;
-		}
+		renderer->viewportSize(rive::ViewportSize(width, height));
 
 		double time = glfwGetTime();
 		float elapsed = (float)(time - lastTime);
 		lastTime = time;
 
+		renderer->clear();
 		// if (artboard != nullptr)
 		// {
 		// 	if (animationInstance != nullptr)
@@ -209,14 +171,11 @@ int main(int argc, const char** argv)
 		// 	artboard->draw(&renderer);
 		// 	renderer.restore();
 		// }
-		renderer.render();
+		renderer->frame();
 
-#if PLATFORM_MACOS
+#if __APPLE__
 		glfwSwapBuffers(window);
-#else
-		Present();
 #endif
-
 		glfwPollEvents();
 	}
 

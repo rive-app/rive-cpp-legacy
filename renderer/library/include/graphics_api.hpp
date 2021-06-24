@@ -5,6 +5,7 @@
 
 namespace rive
 {
+	class LowLevelRenderer;
 	class GraphicsApi
 	{
 	public:
@@ -23,10 +24,29 @@ namespace rive
 		///
 		/// Get the currently active GraphicsApi.
 		///
-		GraphicsApi::Type activeRenderer();
+		LowLevelRenderer* activeRenderer();
 
-		static Renderer* makeRenderer(GraphicsApi::Type api);
-		static Renderer* makeRenderer();
+		static LowLevelRenderer* makeRenderer(GraphicsApi::Type api);
+		static LowLevelRenderer* makeRenderer();
+
+		static const char* name(GraphicsApi::Type type)
+		{
+			switch (type)
+			{
+				case GraphicsApi::unknown:
+					return "Unknown";
+				case GraphicsApi::opengl:
+					return "OpenGL";
+				case GraphicsApi::metal:
+					return "Metal";
+				case GraphicsApi::vulkan:
+					return "Vulkan";
+				case GraphicsApi::d3d11:
+					return "Direct3D 11";
+				case GraphicsApi::d3d12:
+					return "Direct3D 12";
+			}
+		}
 	};
 
 } // namespace rive

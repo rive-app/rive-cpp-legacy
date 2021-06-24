@@ -1,14 +1,15 @@
 
 OPTION=$1
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../dependencies/DiligentEngine_build/build/lib/DiligentCore/Debug/
 
 if [ "$OPTION" = 'help' ]; then
-    echo build.sh - build debug library
-    echo build.sh clean - clean the build
-    echo build.sh release - build release library
+    echo runs.sh - runs debug viewer
+    echo run.sh release - run release viewer
+    echo run.sh debug - run viewer with debugger
 elif [ "$OPTION" = "release" ]; then
-    ./build/bin/release/rive_diligent_viewer
+    ./build/bin/release/rive_low_level_viewer $2
+elif [ "$OPTION" = "debug" ]; then
+    lldb ./build/bin/debug/rive_low_level_viewer $2
 else
-    ./build/bin/debug/rive_diligent_viewer '-mode gl'
+    ./build/bin/debug/rive_low_level_viewer $1
 fi
