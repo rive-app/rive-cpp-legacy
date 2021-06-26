@@ -25,6 +25,8 @@ namespace rive
 		GLint m_GradientPositionUniformIndex = -1;
 		GLint m_ShapeTransformUniformIndex = -1;
 		GLuint m_VertexArray = 0;
+		GLuint m_BlitBuffer = 0;
+		bool m_IsClipping = false;
 
 		/// Indices for the max sized contour, prepended with 2 triangles for
 		/// bounding boxes.
@@ -36,7 +38,6 @@ namespace rive
 		OpenGLRenderer();
 		~OpenGLRenderer();
 		void drawPath(RenderPath* path, RenderPaint* paint) override;
-		void clipPath(RenderPath* path) override;
 
 		void startFrame() override;
 		void endFrame() override;

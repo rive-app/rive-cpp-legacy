@@ -15,6 +15,7 @@ OpenGLRenderer::~OpenGLRenderer()
 	glDeleteShader(m_VertexShader);
 	glDeleteShader(m_FragmentShader);
 	glDeleteBuffers(1, &m_IndexBuffer);
+	glDeleteBuffers(1, &m_BlitBuffer);
 	glDeleteVertexArrays(1, &m_VertexArray);
 }
 
@@ -56,6 +57,25 @@ bool OpenGLRenderer::initialize(void* data)
 	// Create index buffer which we'll grow and populate as necessary.
 	glGenBuffers(1, &m_IndexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+
+	// Create vertex buffer for blitting to full viewport coordinates.
+	float blitBuffer[8] = {
+	    -1.0f,
+	    1.0f,
+
+	    1.0f,
+	    1.0f,
+
+	    1.0f,
+	    -1.0f,
+
+	    -1.0f,
+	    -1.0f,
+	};
+	glGenBuffers(1, &m_BlitBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_BlitBuffer);
+	glBufferData(
+	    GL_ARRAY_BUFFER, 8 * sizeof(float), &blitBuffer[0], GL_STATIC_DRAW);
 
 	// Two triangles for bounds.
 	m_Indices.emplace_back(0);
@@ -103,29 +123,157 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 		return;
 	}
 
+	glColorMask(false, false, false, false);
+	// Set fill type to 0 so we don't perform any gradient fragment calcs.
+	glUniform1i(fillTypeUniformIndex(), 0);
+
+	if (isClippingDirty())
+	{
+		if (m_IsClipping)
+		{
+			// Clear previous clip.
+			glStencilMask(0xFF);
+			glClear(GL_STENCIL_BUFFER_BIT);
+
+			// TODO: instead of clearing the entire buffer, as we clip we could
+			// compute the combined clipping area set and clear that here.
+		}
+		auto clipLength = m_ClipPaths.size();
+		if (clipLength > 0)
+		{
+			m_IsClipping = true;
+			SubPath& firstClipPath = m_ClipPaths[0];
+
+			glStencilMask(0xFF);
+			glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+
+			glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+			glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+			static_cast<OpenGLRenderPath*>(firstClipPath.path())
+			    ->stencil(this, firstClipPath.transform());
+
+			// Fail when not equal to 0 and replace with 0x80 (mark high bit as
+			// included in clip). Require stencil mask (write mask) of 0xFF and
+			// stencil func mask of 0x7F such that the comparison looks for 0
+			// but write 0x80.
+			glStencilMask(0xFF);
+			glStencilFunc(GL_NOTEQUAL, 0x80, 0x7F);
+			glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
+
+			glBindBuffer(GL_ARRAY_BUFFER, m_BlitBuffer);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * 4, (void*)0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+
+			float m4[16] = {1.0,
+			                0.0,
+			                0.0,
+			                0.0,
+
+			                0.0,
+			                1.0,
+			                0.0,
+			                0.0,
+
+			                0.0,
+			                0.0,
+			                1.0,
+			                0.0,
+
+			                0.0,
+			                0.0,
+			                0.0,
+			                1.0};
+
+			glUniformMatrix4fv(transformUniformIndex(), 1, GL_FALSE, m4);
+			glUniformMatrix4fv(m_ProjectionUniformIndex, 1, GL_FALSE, m4);
+
+			// Draw bounds.
+			glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_SHORT, (void*)(0));
+
+			glUniformMatrix4fv(
+			    m_ProjectionUniformIndex, 1, GL_FALSE, m_ModelViewProjection);
+			for (int i = 1; i < clipLength; i++)
+			// for (int i = 1; i < 0; i++)
+			{
+
+				// When already clipping we want to write only to the last/lower
+				// 7 bits as our high 8th bit is used to mark clipping
+				// inclusion.
+				glStencilMask(0x7F);
+				// Pass only if that 8th bit is set. This allows us to write our
+				// new winding into the lower 7 bits.
+				glStencilFunc(GL_EQUAL, 0x80, 0x80);
+				SubPath& nextClipPath = m_ClipPaths[i];
+
+				glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+				glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+				static_cast<OpenGLRenderPath*>(nextClipPath.path())
+				    ->stencil(this, nextClipPath.transform());
+
+				// Fail when not equal to 0 and replace with 0x80 (mark high bit
+				// as included in clip). Require stencil mask (write mask) of
+				// 0xFF and stencil func mask of 0x7F such that the comparison
+				// looks for 0 but write 0x80.
+				glStencilMask(0xFF);
+				glStencilFunc(GL_NOTEQUAL, 0x80, 0x7F);
+				glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
+
+				glBindBuffer(GL_ARRAY_BUFFER, m_BlitBuffer);
+				glEnableVertexAttribArray(0);
+				glVertexAttribPointer(
+				    0, 2, GL_FLOAT, GL_FALSE, 2 * 4, (void*)0);
+
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+
+				glUniformMatrix4fv(transformUniformIndex(), 1, GL_FALSE, m4);
+				glUniformMatrix4fv(m_ProjectionUniformIndex, 1, GL_FALSE, m4);
+				// Draw bounds.
+				glDrawElements(
+				    GL_TRIANGLES, 2 * 3, GL_UNSIGNED_SHORT, (void*)(0));
+
+				glUniformMatrix4fv(m_ProjectionUniformIndex,
+				                   1,
+				                   GL_FALSE,
+				                   m_ModelViewProjection);
+			}
+		}
+		else
+		{
+			m_IsClipping = false;
+		}
+	}
+
 	auto glPath = static_cast<OpenGLRenderPath*>(path);
 
 	// Set up stencil buffer.
-	glStencilMask(0xFF);
-	glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
-	glColorMask(false, false, false, false);
+	if (m_IsClipping)
+	{
+		glStencilMask(0x7F);
+		glStencilFunc(GL_EQUAL, 0x80, 0x80);
+	}
+	else
+	{
+		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+	}
+
 	glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
 	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
 	glPath->stencil(this, transform());
 
 	glColorMask(true, true, true, true);
-	glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
+	glStencilFunc(GL_NOTEQUAL, 0, m_IsClipping ? 0x7F : 0xFF);
 	glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 
 	glPaint->draw(this, transform(), glPath);
 	// glPath->cover(this, transform());
 }
 
-void OpenGLRenderer::clipPath(RenderPath* path) {}
-
 void OpenGLRenderer::startFrame()
 {
+	LowLevelRenderer::startFrame();
 	glUseProgram(m_Program);
 	glEnableVertexAttribArray(0);
 	glUniformMatrix4fv(

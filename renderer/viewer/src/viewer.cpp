@@ -107,7 +107,10 @@ int main(int argc, const char** argv)
 
 	// std::string filename = "assets/polygon_party.riv";
 	// std::string filename = "assets/triangle.riv";
-	std::string filename = "assets/juice.riv";
+	// std::string filename = "assets/juice.riv";
+	// std::string filename = "assets/clip.riv";
+	// std::string filename = "assets/clipped_circle_star_2.riv";
+	std::string filename = "assets/marty.riv";
 	FILE* fp = fopen(filename.c_str(), "r");
 	fseek(fp, 0, SEEK_END);
 	fileBytesLength = ftell(fp);
