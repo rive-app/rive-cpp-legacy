@@ -82,6 +82,11 @@ namespace rive
 
 	public:
 		std::size_t contourLength() const { return m_ContourVertices.size(); }
+		const std::vector<Vec2D>& contourVertices() const
+		{
+			return m_ContourVertices;
+		}
+
 		bool isContainer() const;
 		void addRenderPath(RenderPath* path, const Mat2D& transform) override;
 
