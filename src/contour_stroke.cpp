@@ -6,7 +6,6 @@
 using namespace rive;
 
 static const int subdivisionArcLength = 4.0f;
-bool first = true;
 
 void ContourStroke::reset()
 {
@@ -332,23 +331,47 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 		m_TriangleStrip[startOffset] = m_TriangleStrip[last - 1];
 		m_TriangleStrip[startOffset + 1] = m_TriangleStrip[last];
 	}
-
-	m_Offsets.push_back(m_TriangleStrip.size());
-
-	if (first)
+	else
 	{
-		printf("CLOSED: %i %i\n", isClosed, points.size() - 4);
-		for (auto pt : points)
+		switch (cap)
 		{
-			printf("P: %f %f\n", pt[0], pt[1]);
-		}
-		printf("---\n");
-		first = false;
-
-		for (auto v : m_TriangleStrip)
-		{
-			printf("%f %f\n", v[0], v[1]);
+			case StrokeCap::square:
+			{
+				auto l = m_TriangleStrip.size();
+				Vec2D squareA, squareB;
+				Vec2D strokeDiff = Vec2D(lastDiffNormalized[0] * strokeWidth,
+				                         lastDiffNormalized[1] * strokeWidth);
+				Vec2D::add(squareA, m_TriangleStrip[l - 2], strokeDiff);
+				Vec2D::add(squareB, m_TriangleStrip[l - 1], strokeDiff);
+				m_TriangleStrip.push_back(squareA);
+				m_TriangleStrip.push_back(squareB);
+				break;
+			}
+			case StrokeCap::round:
+			{
+				Vec2D capDirection =
+				    Vec2D(-lastDiffNormalized[1], lastDiffNormalized[0]);
+				float arcLength = std::abs(M_PI * strokeWidth);
+				int steps = (int)std::ceil(arcLength / subdivisionArcLength);
+				float angleTo = std::atan2(capDirection[1], capDirection[0]);
+				float inc = M_PI / steps;
+				float angle = angleTo;
+				// make sure to draw the full cap due triangle strip
+				for (int j = 0; j <= steps; j++)
+				{
+					m_TriangleStrip.push_back(lastPoint);
+					m_TriangleStrip.push_back(
+					    Vec2D(lastPoint[0] + std::cos(angle) * strokeWidth,
+					          lastPoint[1] + std::sin(angle) * strokeWidth));
+					angle -= inc;
+				}
+				break;
+			}
+			default:
+				break;
 		}
 	}
+
+	m_Offsets.push_back(m_TriangleStrip.size());
 }
 #endif
