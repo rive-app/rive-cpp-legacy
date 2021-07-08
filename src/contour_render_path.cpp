@@ -1,5 +1,6 @@
 #ifdef LOW_LEVEL_RENDERING
 #include "contour_render_path.hpp"
+#include "contour_stroke.hpp"
 
 using namespace rive;
 
@@ -34,6 +35,7 @@ void ContourRenderPath::addRenderPath(RenderPath* path, const Mat2D& transform)
 
 void ContourRenderPath::reset()
 {
+	m_IsClosed = false;
 	m_SubPaths.clear();
 	m_ContourVertices.clear();
 	m_Commands.clear();
@@ -59,8 +61,31 @@ void ContourRenderPath::cubicTo(
 void ContourRenderPath::close()
 {
 	m_Commands.emplace_back(PathCommand(PathCommandType::close));
+	m_IsClosed = true;
 }
 
 bool ContourRenderPath::isContainer() const { return !m_SubPaths.empty(); }
 
+void ContourRenderPath::extrudeStroke(ContourStroke* stroke,
+                                      StrokeJoin join,
+                                      StrokeCap cap,
+                                      float strokeWidth)
+{
+	if (isContainer())
+	{
+		for (auto& subPath : m_SubPaths)
+		{
+			static_cast<ContourRenderPath*>(subPath.path())
+			    ->extrudeStroke(stroke, join, cap, strokeWidth);
+		}
+		return;
+	}
+
+	if (isDirty())
+	{
+		computeContour();
+	}
+
+	stroke->extrude(this, m_IsClosed, join, cap, strokeWidth);
+}
 #endif

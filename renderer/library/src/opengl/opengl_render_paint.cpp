@@ -2,6 +2,7 @@
 #include "shapes/paint/color.hpp"
 #include "opengl/opengl_renderer.hpp"
 #include "opengl/opengl_render_path.hpp"
+#include "contour_stroke.hpp"
 
 using namespace rive;
 
@@ -13,18 +14,35 @@ void fillColorBuffer(float* buffer, unsigned int value)
 	buffer[3] = colorAlpha(value) / 255.0f;
 }
 
-void OpenGLRenderPaint::style(RenderPaintStyle style) { m_PaintStyle = style; }
+void OpenGLRenderPaint::style(RenderPaintStyle style)
+{
+	m_PaintStyle = style;
+	delete m_Stroke;
+	if (m_PaintStyle == RenderPaintStyle::stroke)
+	{
+		m_Stroke = new ContourStroke();
+		if (m_StrokeBuffer != 0)
+		{
+			glDeleteBuffers(1, &m_StrokeBuffer);
+		}
+		glGenBuffers(1, &m_StrokeBuffer);
+	}
+	else
+	{
+		m_Stroke = nullptr;
+	}
+}
 
 void OpenGLRenderPaint::color(unsigned int value)
 {
 	fillColorBuffer(m_Color, value);
 }
 
-void OpenGLRenderPaint::thickness(float value) {}
+void OpenGLRenderPaint::thickness(float value) { m_StrokeThickness = value; }
 
-void OpenGLRenderPaint::join(StrokeJoin value) {}
+void OpenGLRenderPaint::join(StrokeJoin value) { m_StrokeJoin = value; }
 
-void OpenGLRenderPaint::cap(StrokeCap value) {}
+void OpenGLRenderPaint::cap(StrokeCap value) { m_StrokeCap = value; }
 
 void OpenGLRenderPaint::blendMode(BlendMode value) {}
 
@@ -53,7 +71,15 @@ void OpenGLRenderPaint::addStop(unsigned int color, float stop)
 
 void OpenGLRenderPaint::completeGradient() {}
 
-OpenGLRenderPaint::~OpenGLRenderPaint() { delete m_Gradient; }
+OpenGLRenderPaint::~OpenGLRenderPaint()
+{
+	if (m_StrokeBuffer != 0)
+	{
+		glDeleteBuffers(1, &m_StrokeBuffer);
+	}
+	delete m_Gradient;
+	delete m_Stroke;
+}
 
 bool OpenGLRenderPaint::doesDraw() const
 {
@@ -76,7 +102,35 @@ void OpenGLRenderPaint::draw(OpenGLRenderer* renderer,
 	glUniform1i(renderer->fillTypeUniformIndex(), type);
 	glUniform4fv(renderer->colorUniformIndex(), 1, m_Color);
 
-	path->cover(renderer, transform);
+	if (m_Stroke != nullptr)
+	{
+		m_Stroke->reset();
+		path->extrudeStroke(
+		    m_Stroke, m_StrokeJoin, m_StrokeCap, m_StrokeThickness / 2.0f);
+
+		const std::vector<Vec2D>& strip = m_Stroke->triangleStrip();
+		auto size = strip.size();
+		if (size == 0)
+		{
+			return;
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_StrokeBuffer);
+		glBufferData(GL_ARRAY_BUFFER,
+		             size * 2 * sizeof(float),
+		             &strip[0][0],
+		             GL_DYNAMIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * 4, (void*)0);
+
+		m_Stroke->resetRenderOffset();
+		path->renderStroke(m_Stroke, renderer, transform);
+	}
+	else
+	{
+		path->cover(renderer, transform);
+	}
 }
 
 OpenGLGradient::OpenGLGradient(int type) : m_Type(type) {}

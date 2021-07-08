@@ -1,6 +1,7 @@
 #include "opengl/opengl_render_path.hpp"
 #include "opengl/opengl_renderer.hpp"
 #include "opengl/opengl.h"
+#include "contour_stroke.hpp"
 
 using namespace rive;
 
@@ -182,4 +183,71 @@ void OpenGLRenderPath::cover(OpenGLRenderer* renderer,
 
 	// Draw bounds.
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_SHORT, (void*)(0));
+}
+
+void OpenGLRenderPath::renderStroke(ContourStroke* stroke,
+                                    OpenGLRenderer* renderer,
+                                    const Mat2D& transform,
+                                    const Mat2D& localTransform)
+{
+	if (isContainer())
+	{
+		for (auto& subPath : m_SubPaths)
+		{
+			const Mat2D& subPathTransform = subPath.transform();
+			Mat2D pathTransform;
+			Mat2D::multiply(pathTransform, transform, subPathTransform);
+			reinterpret_cast<OpenGLRenderPath*>(subPath.path())
+			    ->renderStroke(
+			        stroke, renderer, pathTransform, subPathTransform);
+		}
+		return;
+	}
+
+	{
+		float m4[16] = {transform[0],
+		                transform[1],
+		                0.0,
+		                0.0,
+		                transform[2],
+		                transform[3],
+		                0.0,
+		                0.0,
+		                0.0,
+		                0.0,
+		                1.0,
+		                0.0,
+		                transform[4],
+		                transform[5],
+		                0.0,
+		                1.0};
+
+		glUniformMatrix4fv(renderer->transformUniformIndex(), 1, GL_FALSE, m4);
+	}
+	{
+		float m4[16] = {localTransform[0],
+		                localTransform[1],
+		                0.0,
+		                0.0,
+		                localTransform[2],
+		                localTransform[3],
+		                0.0,
+		                0.0,
+		                0.0,
+		                0.0,
+		                1.0,
+		                0.0,
+		                localTransform[4],
+		                localTransform[5],
+		                0.0,
+		                1.0};
+
+		glUniformMatrix4fv(
+		    renderer->shapeTransformUniformIndex(), 1, GL_FALSE, m4);
+	}
+
+	std::size_t start, end;
+	stroke->nextRenderOffset(start, end);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, start, end - start);
 }

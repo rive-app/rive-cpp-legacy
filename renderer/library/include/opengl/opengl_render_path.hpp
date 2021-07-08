@@ -24,6 +24,10 @@ namespace rive
 		void cover(OpenGLRenderer* renderer,
 		           const Mat2D& transform,
 		           const Mat2D& localTransform = Mat2D::identity());
+		void renderStroke(ContourStroke* stroke,
+		                  OpenGLRenderer* renderer,
+		                  const Mat2D& transform,
+		                  const Mat2D& localTransform = Mat2D::identity());
 	};
 } // namespace rive
 #endif

@@ -3,12 +3,14 @@
 
 #include "renderer.hpp"
 #include <vector>
+#include "opengl/opengl.h"
 
 namespace rive
 {
 	class OpenGLRenderer;
 	class OpenGLRenderPaint;
 	class OpenGLRenderPath;
+	class ContourStroke;
 
 	class OpenGLGradient
 	{
@@ -34,6 +36,11 @@ namespace rive
 		RenderPaintStyle m_PaintStyle;
 		float m_Color[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 		OpenGLGradient* m_Gradient = nullptr;
+		ContourStroke* m_Stroke = nullptr;
+		StrokeJoin m_StrokeJoin = StrokeJoin::miter;
+		StrokeCap m_StrokeCap = StrokeCap::butt;
+		float m_StrokeThickness = 0.0f;
+		GLuint m_StrokeBuffer = 0;
 
 	public:
 		void style(RenderPaintStyle style) override;

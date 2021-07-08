@@ -118,10 +118,13 @@ bool OpenGLRenderer::initialize(void* data)
 void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 {
 	auto glPaint = static_cast<OpenGLRenderPaint*>(paint);
-	if (glPaint->style() == RenderPaintStyle::stroke || !glPaint->doesDraw())
+	// if (glPaint->style() == RenderPaintStyle::stroke || !glPaint->doesDraw())
+
+	if (!glPaint->doesDraw())
 	{
 		return;
 	}
+	bool needsStencil = glPaint->style() == RenderPaintStyle::fill;
 
 	glColorMask(false, false, false, false);
 	// Set fill type to 0 so we don't perform any gradient fragment calcs.
@@ -246,28 +249,49 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 
 	auto glPath = static_cast<OpenGLRenderPath*>(path);
 
-	// Set up stencil buffer.
-	if (m_IsClipping)
+	if (needsStencil)
 	{
-		glStencilMask(0x7F);
-		glStencilFunc(GL_EQUAL, 0x80, 0x80);
+		// Set up stencil buffer.
+		if (m_IsClipping)
+		{
+			glStencilMask(0x7F);
+			glStencilFunc(GL_EQUAL, 0x80, 0x80);
+		}
+		else
+		{
+			glStencilMask(0xFF);
+			glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+		}
+
+		glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
+		glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
+
+		glPath->stencil(this, transform());
+
+		glColorMask(true, true, true, true);
+		glStencilFunc(GL_NOTEQUAL, 0, m_IsClipping ? 0x7F : 0xFF);
+		glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 	}
 	else
 	{
-		glStencilMask(0xFF);
-		glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+		if (m_IsClipping)
+		{
+			glStencilMask(0x7F);
+			glStencilFunc(GL_EQUAL, 0x80, 0x80);
+		}
+		else
+		{
+			glStencilMask(0xFF);
+			glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+		}
+		glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_KEEP);
+		glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP);
+		glColorMask(true, true, true, true);
+		// glStencilFunc(GL_ALWAYS, 0x0, 0xFF);
+		glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
 	}
-
-	glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
-	glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
-
-	glPath->stencil(this, transform());
-
-	glColorMask(true, true, true, true);
-	glStencilFunc(GL_NOTEQUAL, 0, m_IsClipping ? 0x7F : 0xFF);
-	glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-
 	glPaint->draw(this, transform(), glPath);
+
 	// glPath->cover(this, transform());
 }
 

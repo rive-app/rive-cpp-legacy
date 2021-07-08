@@ -6,6 +6,22 @@
 using namespace rive;
 
 static const int subdivisionArcLength = 4.0f;
+bool first = true;
+
+void ContourStroke::reset()
+{
+	m_TriangleStrip.clear();
+	m_Offsets.clear();
+}
+
+void ContourStroke::resetRenderOffset() { m_RenderOffset = 0; }
+
+void ContourStroke::nextRenderOffset(std::size_t& start, std::size_t& end)
+{
+	assert(m_RenderOffset < m_Offsets.size());
+	start = m_RenderOffset == 0 ? 0 : m_Offsets[m_RenderOffset - 1];
+	end = m_Offsets[m_RenderOffset++];
+}
 
 void ContourStroke::extrude(const ContourRenderPath* renderPath,
                             bool isClosed,
@@ -13,17 +29,16 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
                             StrokeCap cap,
                             float strokeWidth)
 {
-	m_TriangleStrip.clear();
-
 	const std::vector<Vec2D>& points = renderPath->contourVertices();
 	auto pointCount = points.size();
-	if (pointCount < 2)
+	if (pointCount < 6)
 	{
 		return;
 	}
-	Vec2D lastPoint = points[0];
+	auto startOffset = m_TriangleStrip.size();
+	Vec2D lastPoint = points[4];
 	Vec2D lastDiff;
-	Vec2D::subtract(lastDiff, points[1], lastPoint);
+	Vec2D::subtract(lastDiff, points[5], lastPoint);
 	float lastLength = Vec2D::length(lastDiff);
 	Vec2D lastDiffNormalized;
 	Vec2D::scale(lastDiffNormalized, lastDiff, 1.0f / lastLength);
@@ -76,16 +91,18 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 	m_TriangleStrip.push_back(lastA);
 	m_TriangleStrip.push_back(lastB);
 
+	pointCount -= isClosed ? 6 : 5;
 	std::size_t adjustedPointCount = isClosed ? pointCount + 1 : pointCount;
 
 	for (std::size_t i = 1; i < adjustedPointCount; i++)
 	{
-		const Vec2D& point = points[i % pointCount];
+		const Vec2D& point = points[(i % pointCount) + 4];
 		Vec2D diff, diffNormalized, next;
 		float length;
 		if (i < adjustedPointCount - 1 || isClosed)
 		{
-			Vec2D::subtract(diff, (next = points[(i + 1) % pointCount]), point);
+			Vec2D::subtract(
+			    diff, (next = points[((i + 1) % pointCount) + 4]), point);
 			length = Vec2D::length(diff);
 			Vec2D::scale(diffNormalized, diff, 1.0f / length);
 		}
@@ -258,6 +275,7 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 				else
 				{
 					Vec2D::subtract(b1, point, bisector);
+					b2 = b1;
 				}
 
 				Vec2D a;
@@ -306,6 +324,31 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 		lastPoint = point;
 		lastDiff = diff;
 		lastDiffNormalized = diffNormalized;
+	}
+
+	if (isClosed)
+	{
+		auto last = m_TriangleStrip.size() - 1;
+		m_TriangleStrip[startOffset] = m_TriangleStrip[last - 1];
+		m_TriangleStrip[startOffset + 1] = m_TriangleStrip[last];
+	}
+
+	m_Offsets.push_back(m_TriangleStrip.size());
+
+	if (first)
+	{
+		printf("CLOSED: %i %i\n", isClosed, points.size() - 4);
+		for (auto pt : points)
+		{
+			printf("P: %f %f\n", pt[0], pt[1]);
+		}
+		printf("---\n");
+		first = false;
+
+		for (auto v : m_TriangleStrip)
+		{
+			printf("%f %f\n", v[0], v[1]);
+		}
 	}
 }
 #endif

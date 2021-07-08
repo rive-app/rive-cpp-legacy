@@ -66,6 +66,7 @@ namespace rive
 		const Mat2D& transform() const;
 	};
 
+	class ContourStroke;
 	///
 	/// Segments curves into line segments and computes the bounds of the
 	/// segmented curve.
@@ -79,6 +80,7 @@ namespace rive
 		std::vector<PathCommand> m_Commands;
 		bool m_IsDirty = true;
 		float m_ContourThreshold = 1.0f;
+		bool m_IsClosed = false;
 
 	public:
 		std::size_t contourLength() const { return m_ContourVertices.size(); }
@@ -86,6 +88,7 @@ namespace rive
 		{
 			return m_ContourVertices;
 		}
+		bool isClosed() const { return m_IsClosed; }
 
 		bool isContainer() const;
 		void addRenderPath(RenderPath* path, const Mat2D& transform) override;
@@ -99,6 +102,11 @@ namespace rive
 
 		void computeContour();
 		bool isDirty() const { return m_IsDirty; }
+
+		void extrudeStroke(ContourStroke* stroke,
+		                   StrokeJoin join,
+		                   StrokeCap cap,
+		                   float strokeWidth);
 	};
 } // namespace rive
 #endif
