@@ -21,7 +21,7 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 	{
 		return;
 	}
-	const Vec2D& lastPoint = points[0];
+	Vec2D lastPoint = points[0];
 	Vec2D lastDiff;
 	Vec2D::subtract(lastDiff, points[1], lastPoint);
 	float lastLength = Vec2D::length(lastDiff);
@@ -183,6 +183,129 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
 				m_TriangleStrip.push_back(d2);
 			}
 		}
+		else
+		{
+			Vec2D ldPStroke = Vec2D(lastDiffNormalized[1] * -strokeWidth,
+			                        lastDiffNormalized[0] * strokeWidth);
+			Vec2D dPStroke = Vec2D(diffNormalized[1] * -strokeWidth,
+			                       diffNormalized[0] * strokeWidth);
+			if (cross <= 0)
+			{
+				// Bevel the outer (left in this case) edge.
+				Vec2D a1;
+				Vec2D a2;
+
+				if (bevelInner)
+				{
+					Vec2D::add(a1, point, ldPStroke);
+					Vec2D::add(a2, point, dPStroke);
+				}
+				else
+				{
+					Vec2D::add(a1, point, bisector);
+					a2 = a1;
+				}
+
+				Vec2D b;
+				Vec2D::subtract(b, point, ldPStroke);
+				Vec2D bn;
+				Vec2D::subtract(bn, point, dPStroke);
+
+				m_TriangleStrip.push_back(a1);
+				m_TriangleStrip.push_back(b);
+				if (join == StrokeJoin::round)
+				{
+					const Vec2D& pivot = bevelInner ? point : a1;
+					Vec2D toPrev;
+					Vec2D::subtract(toPrev, bn, point);
+					Vec2D toNext;
+					Vec2D::subtract(toNext, b, point);
+					float angleFrom = std::atan2(toPrev[1], toPrev[0]);
+					float angleTo = std::atan2(toNext[1], toNext[0]);
+					if (angleTo > angleFrom)
+					{
+						angleTo -= M_2_PI;
+					}
+					float range = angleTo - angleFrom;
+					float arcLength = std::abs(range * strokeWidth);
+					int steps = std::ceil(arcLength / subdivisionArcLength);
+
+					float inc = range / steps;
+					float angle = angleTo - inc;
+					for (int j = 0; j < steps - 1; j++)
+					{
+						m_TriangleStrip.push_back(pivot);
+						m_TriangleStrip.emplace_back(
+						    Vec2D(point[0] + std::cos(angle) * strokeWidth,
+						          point[1] + std::sin(angle) * strokeWidth));
+
+						angle -= inc;
+					}
+				}
+				m_TriangleStrip.push_back(a2);
+				m_TriangleStrip.push_back(bn);
+			}
+			else
+			{
+				// Bevel the outer (right in this case) edge.
+				Vec2D b1;
+				Vec2D b2;
+				if (bevelInner)
+				{
+					Vec2D::subtract(b1, point, ldPStroke);
+					Vec2D::subtract(b2, point, dPStroke);
+				}
+				else
+				{
+					Vec2D::subtract(b1, point, bisector);
+				}
+
+				Vec2D a;
+				Vec2D::add(a, point, ldPStroke);
+				Vec2D an;
+
+				Vec2D::add(an, point, dPStroke);
+
+				m_TriangleStrip.push_back(a);
+				m_TriangleStrip.push_back(b1);
+
+				if (join == StrokeJoin::round)
+				{
+					const Vec2D& pivot = bevelInner ? point : b1;
+					Vec2D toPrev;
+					Vec2D::subtract(toPrev, a, point);
+					Vec2D toNext;
+					Vec2D::subtract(toNext, an, point);
+					float angleFrom = std::atan2(toPrev[1], toPrev[0]);
+					float angleTo = std::atan2(toNext[1], toNext[0]);
+					if (angleTo > angleFrom)
+					{
+						angleTo -= M_2_PI;
+					}
+
+					float range = angleTo - angleFrom;
+					float arcLength = std::abs(range * strokeWidth);
+					int steps = std::ceil(arcLength / subdivisionArcLength);
+					float inc = range / steps;
+
+					float angle = angleFrom + inc;
+					for (int j = 0; j < steps - 1; j++)
+					{
+						m_TriangleStrip.emplace_back(
+						    Vec2D(point[0] + std::cos(angle) * strokeWidth,
+						          point[1] + std::sin(angle) * strokeWidth));
+						m_TriangleStrip.push_back(pivot);
+						angle += inc;
+					}
+				}
+				m_TriangleStrip.push_back(an);
+				m_TriangleStrip.push_back(b2);
+			}
+		}
+
+		lastPoint = point;
+		lastDiff = diff;
+		lastDiffNormalized = diffNormalized;
 	}
 }
 #endif
