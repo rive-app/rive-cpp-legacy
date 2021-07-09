@@ -61,10 +61,12 @@ void Stroke::joinChanged()
 
 void Stroke::addStrokeEffect(StrokeEffect* effect) { m_Effect = effect; }
 
-void Stroke::invalidateEffects()
+void Stroke::invalidate()
 {
 	if (m_Effect != nullptr)
 	{
 		m_Effect->invalidateEffect();
 	}
+	assert(m_RenderPaint != nullptr);
+	m_RenderPaint->invalidateStroke();
 }

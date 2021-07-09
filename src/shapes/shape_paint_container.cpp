@@ -37,13 +37,13 @@ PathSpace ShapePaintContainer::pathSpace() const
 	return space;
 }
 
-void ShapePaintContainer::invalidateStrokeEffects()
+void ShapePaintContainer::invalidateStroke()
 {
 	for (auto paint : m_ShapePaints)
 	{
 		if (paint->is<Stroke>())
 		{
-			paint->as<Stroke>()->invalidateEffects();
+			paint->as<Stroke>()->invalidate();
 		}
 	}
 }

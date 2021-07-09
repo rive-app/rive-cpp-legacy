@@ -41,6 +41,7 @@ namespace rive
 		StrokeCap m_StrokeCap = StrokeCap::butt;
 		float m_StrokeThickness = 0.0f;
 		GLuint m_StrokeBuffer = 0;
+		bool m_StrokeDirty = false;
 
 	public:
 		void style(RenderPaintStyle style) override;
@@ -55,6 +56,7 @@ namespace rive
 		void radialGradient(float sx, float sy, float ex, float ey) override;
 		void addStop(unsigned int color, float stop) override;
 		void completeGradient() override;
+		void invalidateStroke() override;
 		~OpenGLRenderPaint();
 
 		bool doesDraw() const;

@@ -21,6 +21,7 @@ void OpenGLRenderPaint::style(RenderPaintStyle style)
 	if (m_PaintStyle == RenderPaintStyle::stroke)
 	{
 		m_Stroke = new ContourStroke();
+		m_StrokeDirty = true;
 		if (m_StrokeBuffer != 0)
 		{
 			glDeleteBuffers(1, &m_StrokeBuffer);
@@ -30,6 +31,7 @@ void OpenGLRenderPaint::style(RenderPaintStyle style)
 	else
 	{
 		m_Stroke = nullptr;
+		m_StrokeDirty = false;
 	}
 }
 
@@ -71,6 +73,14 @@ void OpenGLRenderPaint::addStop(unsigned int color, float stop)
 
 void OpenGLRenderPaint::completeGradient() {}
 
+void OpenGLRenderPaint::invalidateStroke()
+{
+	if (m_Stroke != nullptr)
+	{
+		m_StrokeDirty = true;
+	}
+}
+
 OpenGLRenderPaint::~OpenGLRenderPaint()
 {
 	if (m_StrokeBuffer != 0)
@@ -104,9 +114,13 @@ void OpenGLRenderPaint::draw(OpenGLRenderer* renderer,
 
 	if (m_Stroke != nullptr)
 	{
-		m_Stroke->reset();
-		path->extrudeStroke(
-		    m_Stroke, m_StrokeJoin, m_StrokeCap, m_StrokeThickness / 2.0f);
+		if (m_StrokeDirty)
+		{
+			m_Stroke->reset();
+			path->extrudeStroke(
+			    m_Stroke, m_StrokeJoin, m_StrokeCap, m_StrokeThickness / 2.0f);
+			m_StrokeDirty = false;
+		}
 
 		const std::vector<Vec2D>& strip = m_Stroke->triangleStrip();
 		auto size = strip.size();

@@ -32,7 +32,7 @@ void Shape::update(ComponentDirt value)
 void Shape::pathChanged()
 {
 	m_PathComposer.addDirt(ComponentDirt::Path, true);
-	invalidateStrokeEffects();
+	invalidateStroke();
 }
 
 void Shape::draw(Renderer* renderer)

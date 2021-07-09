@@ -19,6 +19,7 @@ namespace rive
 		void radialGradient(float sx, float sy, float ex, float ey) override {}
 		void addStop(unsigned int color, float stop) override {}
 		void completeGradient() override {}
+		void invalidateStroke() override {}
 	};
 
 	enum class NoOpPathCommandType

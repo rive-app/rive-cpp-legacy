@@ -21,4 +21,6 @@ void MetalRenderPaint::addStop(unsigned int color, float stop) {}
 
 void MetalRenderPaint::completeGradient() {}
 
+void MetalRenderPaint::invalidateStroke() {}
+
 MetalRenderPaint::~MetalRenderPaint() {}

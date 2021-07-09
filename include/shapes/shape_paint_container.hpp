@@ -26,7 +26,7 @@ namespace rive
 
 		PathSpace pathSpace() const;
 
-		void invalidateStrokeEffects();
+		void invalidateStroke();
 
 		CommandPath* makeCommandPath(PathSpace space);
 	};
