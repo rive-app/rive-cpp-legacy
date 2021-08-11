@@ -1,6 +1,6 @@
 #ifdef LOW_LEVEL_RENDERING
-#include "contour_render_path.hpp"
-#include "contour_stroke.hpp"
+#include "rive/contour_render_path.hpp"
+#include "rive/contour_stroke.hpp"
 
 using namespace rive;
 

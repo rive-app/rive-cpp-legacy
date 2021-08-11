@@ -1,7 +1,7 @@
 #ifndef _RIVE_METAL_RENDER_PAINT_HPP_
 #define _RIVE_METAL_RENDER_PAINT_HPP_
 
-#include "renderer.hpp"
+#include "rive/renderer.hpp"
 
 namespace rive
 {

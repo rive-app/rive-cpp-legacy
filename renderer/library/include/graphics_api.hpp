@@ -1,7 +1,7 @@
 #ifndef _RIVE_GRAPHICS_API_HPP_
 #define _RIVE_GRAPHICS_API_HPP_
 
-#include "renderer.hpp"
+#include "rive/renderer.hpp"
 
 namespace rive
 {

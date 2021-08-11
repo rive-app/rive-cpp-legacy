@@ -1,7 +1,7 @@
 #ifndef _RIVE_METAL_RENDER_PATH_HPP_
 #define _RIVE_METAL_RENDER_PATH_HPP_
 
-#include "contour_render_path.hpp"
+#include "rive/contour_render_path.hpp"
 
 namespace rive
 {

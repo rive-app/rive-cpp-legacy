@@ -1,40 +1,51 @@
-#include "file.hpp"
-#include "animation/animation.hpp"
-#include "core/field_types/core_color_type.hpp"
-#include "core/field_types/core_double_type.hpp"
-#include "core/field_types/core_string_type.hpp"
-#include "core/field_types/core_uint_type.hpp"
-#include "generated/core_registry.hpp"
-#include "importers/artboard_importer.hpp"
-#include "importers/import_stack.hpp"
-#include "importers/keyed_object_importer.hpp"
-#include "importers/keyed_property_importer.hpp"
-#include "importers/linear_animation_importer.hpp"
-#include "importers/state_machine_importer.hpp"
-#include "importers/state_machine_layer_importer.hpp"
-#include "importers/layer_state_importer.hpp"
-#include "importers/state_transition_importer.hpp"
-#include "animation/blend_state_transition.hpp"
-#include "animation/any_state.hpp"
-#include "animation/entry_state.hpp"
-#include "animation/exit_state.hpp"
-#include "animation/animation_state.hpp"
-#include "animation/blend_state_1d.hpp"
-#include "animation/blend_state_direct.hpp"
+#include "rive/file.hpp"
+#include "rive/animation/animation.hpp"
+#include "rive/core/field_types/core_color_type.hpp"
+#include "rive/core/field_types/core_double_type.hpp"
+#include "rive/core/field_types/core_string_type.hpp"
+#include "rive/core/field_types/core_uint_type.hpp"
+#include "rive/generated/core_registry.hpp"
+#include "rive/importers/artboard_importer.hpp"
+#include "rive/importers/import_stack.hpp"
+#include "rive/importers/keyed_object_importer.hpp"
+#include "rive/importers/keyed_property_importer.hpp"
+#include "rive/importers/linear_animation_importer.hpp"
+#include "rive/importers/state_machine_importer.hpp"
+#include "rive/importers/state_machine_layer_importer.hpp"
+#include "rive/importers/layer_state_importer.hpp"
+#include "rive/importers/state_transition_importer.hpp"
+#include "rive/animation/blend_state_transition.hpp"
+#include "rive/animation/any_state.hpp"
+#include "rive/animation/entry_state.hpp"
+#include "rive/animation/exit_state.hpp"
+#include "rive/animation/animation_state.hpp"
+#include "rive/animation/blend_state_1d.hpp"
+#include "rive/animation/blend_state_direct.hpp"
 
 // Default namespace for Rive Cpp code
 using namespace rive;
+
+#if !defined(RIVE_FMT_U64)
+    #if defined(__ANDROID__)
+        #define RIVE_FMT_U64 "%llu"
+        #define RIVE_FMT_I64 "%lld"
+    #else
+        #include <inttypes.h>
+        #define RIVE_FMT_U64 "%" PRIu64
+        #define RIVE_FMT_I64 "%" PRId64
+    #endif
+#endif
 
 // Import a single Rive runtime object.
 // Used by the file importer.
 static Core* readRuntimeObject(BinaryReader& reader,
                                const RuntimeHeader& header)
 {
-	auto coreObjectKey = reader.readVarUint();
+	auto coreObjectKey = reader.readVarUint64();
 	auto object = CoreRegistry::makeCoreInstance((int)coreObjectKey);
 	while (true)
 	{
-		auto propertyKey = reader.readVarUint();
+		auto propertyKey = reader.readVarUint64();
 		if (propertyKey == 0)
 		{
 			// Terminator. https://media.giphy.com/media/7TtvTUMm9mp20/giphy.gif
@@ -62,7 +73,7 @@ static Core* readRuntimeObject(BinaryReader& reader,
 				// Still couldn't find it, give up.
 				fprintf(
 				    stderr,
-				    "Unknown property key %llu, missing from property ToC.\n",
+				    "Unknown property key " RIVE_FMT_U64 ", missing from property ToC.\n",
 				    propertyKey);
 				delete object;
 				return nullptr;
@@ -88,7 +99,7 @@ static Core* readRuntimeObject(BinaryReader& reader,
 	if (object == nullptr)
 	{
 		// fprintf(stderr,
-		//         "File contains an unknown object with coreType %llu, which "
+		//         "File contains an unknown object with coreType " RIVE_FMT_U64 ", which "
 		//         "this runtime doesn't understand.\n",
 		//         coreObjectKey);
 		return nullptr;
@@ -144,6 +155,26 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 		if (object == nullptr)
 		{
 			importStack.readNullObject();
+			continue;
+		}
+		if (object->import(importStack) == StatusCode::Ok)
+		{
+			switch (object->coreType())
+			{
+				case Backboard::typeKey:
+					m_Backboard = object->as<Backboard>();
+					break;
+				case Artboard::typeKey:
+					m_Artboards.push_back(object->as<Artboard>());
+					break;
+			}
+		}
+		else
+		{
+			fprintf(stderr,
+			        "Failed to import object of type %d\n",
+			        object->coreType());
+			delete object;
 			continue;
 		}
 		ImportStackObject* stackObject = nullptr;
@@ -213,18 +244,6 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 		{
 			// Some previous stack item didn't resolve.
 			return ImportResult::malformed;
-		}
-		if (object->import(importStack) == StatusCode::Ok)
-		{
-			switch (object->coreType())
-			{
-				case Backboard::typeKey:
-					m_Backboard = object->as<Backboard>();
-					break;
-				case Artboard::typeKey:
-					m_Artboards.push_back(object->as<Artboard>());
-					break;
-			}
 		}
 	}
 

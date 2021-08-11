@@ -1,9 +1,9 @@
 #ifndef _RIVE_OPENGL_RENDER_PATH_HPP_
 #define _RIVE_OPENGL_RENDER_PATH_HPP_
 
-#include "contour_render_path.hpp"
 #include "opengl.h"
-#include "math/mat2d.hpp"
+#include "rive/contour_render_path.hpp"
+#include "rive/math/mat2d.hpp"
 
 namespace rive
 {

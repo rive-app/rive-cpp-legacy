@@ -1,7 +1,7 @@
 #include "opengl/opengl_render_path.hpp"
 #include "opengl/opengl_renderer.hpp"
 #include "opengl/opengl.h"
-#include "contour_stroke.hpp"
+#include "rive/contour_stroke.hpp"
 
 using namespace rive;
 

@@ -1,7 +1,7 @@
 #if defined(LOW_LEVEL_RENDERING) && defined(CONTOUR_RECURSIVE)
 
-#include "contour_render_path.hpp"
-#include "math/cubic_utilities.hpp"
+#include "rive/contour_render_path.hpp"
+#include "rive/math/cubic_utilities.hpp"
 #include <cassert>
 
 using namespace rive;

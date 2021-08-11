@@ -1,6 +1,6 @@
-#include "math/mat2d.hpp"
-#include "math/transform_components.hpp"
-#include "math/vec2d.hpp"
+#include "rive/math/mat2d.hpp"
+#include "rive/math/transform_components.hpp"
+#include "rive/math/vec2d.hpp"
 #include <cmath>
 
 using namespace rive;
@@ -9,6 +9,11 @@ Mat2D::Mat2D() : m_Buffer{1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f} {}
 
 Mat2D::Mat2D(const Mat2D& copy) :
     m_Buffer{copy[0], copy[1], copy[2], copy[3], copy[4], copy[5]}
+{
+}
+
+Mat2D::Mat2D(float x1, float y1, float x2, float y2, float tx, float ty) :
+    m_Buffer{x1, y1, x2, y2, tx, ty}
 {
 }
 
@@ -99,7 +104,7 @@ void Mat2D::compose(Mat2D& result, const TransformComponents& components)
 {
 	float r = components.rotation();
 
-	if (r != 0.0)
+	if (r != 0.0f)
 	{
 		Mat2D::fromRotation(result, r);
 	}
@@ -114,7 +119,7 @@ void Mat2D::compose(Mat2D& result, const TransformComponents& components)
 	Mat2D::scale(result, result, scale);
 
 	float sk = components.skew();
-	if (sk != 0.0)
+	if (sk != 0.0f)
 	{
 		result[2] = result[0] * sk + result[2];
 		result[3] = result[1] * sk + result[3];

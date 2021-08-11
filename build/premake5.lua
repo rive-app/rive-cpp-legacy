@@ -11,7 +11,7 @@ includedirs {"../include"}
 
 files {"../src/**.cpp"}
 
-buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
+buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti", "-Werror=format"}
 
 newoption {
     trigger = "with-low-level-rendering",

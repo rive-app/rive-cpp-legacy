@@ -1,6 +1,6 @@
-#include "shapes/paint/trim_path.hpp"
-#include "shapes/metrics_path.hpp"
-#include "shapes/paint/stroke.hpp"
+#include "rive/shapes/paint/trim_path.hpp"
+#include "rive/shapes/metrics_path.hpp"
+#include "rive/shapes/paint/stroke.hpp"
 
 using namespace rive;
 
@@ -98,7 +98,7 @@ RenderPath* TrimPath::effectPath(MetricsPath* source)
 				{
 					startLength = 0;
 					endLength -= pathLength;
-					path->trim(startLength, endLength, false, m_TrimmedPath);
+					path->trim(startLength, endLength, true, m_TrimmedPath);
 				}
 			}
 		}

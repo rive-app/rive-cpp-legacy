@@ -1,9 +1,9 @@
-#include "component.hpp"
-#include "artboard.hpp"
-#include "container_component.hpp"
-#include "core_context.hpp"
-#include "importers/artboard_importer.hpp"
-#include "importers/import_stack.hpp"
+#include "rive/component.hpp"
+#include "rive/artboard.hpp"
+#include "rive/container_component.hpp"
+#include "rive/core_context.hpp"
+#include "rive/importers/artboard_importer.hpp"
+#include "rive/importers/import_stack.hpp"
 #include <algorithm>
 
 using namespace rive;
@@ -28,8 +28,11 @@ StatusCode Component::onAddedDirty(CoreContext* context)
 void Component::addDependent(Component* component)
 {
 	// Make it's not already a dependent.
-	assert(std::find(m_Dependents.begin(), m_Dependents.end(), component) ==
-	       m_Dependents.end());
+	if (std::find(m_Dependents.begin(), m_Dependents.end(), component) !=
+	    m_Dependents.end())
+	{
+		return;
+	}
 	m_Dependents.push_back(component);
 }
 
@@ -62,6 +65,14 @@ bool Component::addDirt(ComponentDirt value, bool recurse)
 
 StatusCode Component::import(ImportStack& importStack)
 {
+	if (is<Artboard>())
+	{
+		// Artboards are always their first object.
+		assert(as<Artboard>()->objects().size() == 0);
+		as<Artboard>()->addObject(this);
+		return Super::import(importStack);
+	}
+
 	auto artboardImporter =
 	    importStack.latest<ArtboardImporter>(ArtboardBase::typeKey);
 	if (artboardImporter == nullptr)

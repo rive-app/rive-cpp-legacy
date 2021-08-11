@@ -1,7 +1,7 @@
-#include "artboard.hpp"
-#include "file.hpp"
-#include "layout.hpp"
-#include "animation/linear_animation_instance.hpp"
+#include "rive/artboard.hpp"
+#include "rive/file.hpp"
+#include "rive/layout.hpp"
+#include "rive/animation/linear_animation_instance.hpp"
 #include "low_level/low_level_renderer.hpp"
 #include <string.h>
 

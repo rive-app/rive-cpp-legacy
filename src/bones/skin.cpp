@@ -1,8 +1,9 @@
-#include "bones/skin.hpp"
-#include "bones/bone.hpp"
-#include "bones/skinnable.hpp"
-#include "bones/tendon.hpp"
-#include "shapes/path_vertex.hpp"
+#include "rive/bones/skin.hpp"
+#include "rive/bones/bone.hpp"
+#include "rive/bones/skinnable.hpp"
+#include "rive/bones/tendon.hpp"
+#include "rive/shapes/path_vertex.hpp"
+#include "rive/constraints/constraint.hpp"
 
 using namespace rive;
 
@@ -50,7 +51,12 @@ void Skin::buildDependencies()
 	// depend on bones from tendons
 	for (auto tendon : m_Tendons)
 	{
-		tendon->bone()->addDependent(this);
+		auto bone = tendon->bone();
+		bone->addDependent(this);
+		for (auto constraint : bone->peerConstraints())
+		{
+			constraint->parent()->addDependent(this);
+		}
 	}
 
 	// Make sure no-one is calling this twice.

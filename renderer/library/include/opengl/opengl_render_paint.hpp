@@ -1,9 +1,9 @@
 #ifndef _RIVE_OPENGL_RENDER_PAINT_HPP_
 #define _RIVE_OPENGL_RENDER_PAINT_HPP_
 
-#include "renderer.hpp"
-#include <vector>
+#include "rive/renderer.hpp"
 #include "opengl/opengl.h"
+#include <vector>
 
 namespace rive
 {

@@ -1,8 +1,8 @@
 #ifndef _RIVE_OPENGL_RENDERER_HPP_
 #define _RIVE_OPENGL_RENDERER_HPP_
 
+#include "rive/math/mat2d.hpp"
 #include "low_level/low_level_renderer.hpp"
-#include "math/mat2d.hpp"
 #include "opengl.h"
 #include <vector>
 

@@ -1,8 +1,9 @@
 #include "opengl/opengl_render_paint.hpp"
-#include "shapes/paint/color.hpp"
 #include "opengl/opengl_renderer.hpp"
 #include "opengl/opengl_render_path.hpp"
-#include "contour_stroke.hpp"
+
+#include "rive/shapes/paint/color.hpp"
+#include "rive/contour_stroke.hpp"
 
 using namespace rive;
 

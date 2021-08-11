@@ -1,7 +1,7 @@
 #ifdef LOW_LEVEL_RENDERING
-#include "contour_stroke.hpp"
-#include "contour_render_path.hpp"
-#include "math/vec2d.hpp"
+#include "rive/contour_stroke.hpp"
+#include "rive/contour_render_path.hpp"
+#include "rive/math/vec2d.hpp"
 
 using namespace rive;
 

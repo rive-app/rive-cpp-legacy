@@ -1,6 +1,6 @@
-#include "shapes/metrics_path.hpp"
-#include "renderer.hpp"
-#include "math/cubic_utilities.hpp"
+#include "rive/shapes/metrics_path.hpp"
+#include "rive/renderer.hpp"
+#include "rive/math/cubic_utilities.hpp"
 #include <math.h>
 
 using namespace rive;

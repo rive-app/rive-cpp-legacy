@@ -1,9 +1,9 @@
 #ifndef _RIVE_LOW_LEVEL_RENDERER_HPP_
 #define _RIVE_LOW_LEVEL_RENDERER_HPP_
 
-#include "renderer.hpp"
+#include "rive/renderer.hpp"
+#include "rive/math/mat2d.hpp"
 #include "graphics_api.hpp"
-#include "math/mat2d.hpp"
 #include <stdint.h>
 #include <list>
 #include <vector>
