@@ -94,7 +94,6 @@ OpenGLRenderPaint::~OpenGLRenderPaint()
 
 bool OpenGLRenderPaint::doesDraw() const
 {
-	return true;
 	return m_Color[3] > 0.0f &&
 	       (m_Gradient == nullptr || m_Gradient->m_IsVisible);
 }
@@ -117,9 +116,13 @@ void OpenGLRenderPaint::draw(OpenGLRenderer* renderer,
 	{
 		if (m_StrokeDirty)
 		{
+			static Mat2D identity;
 			m_Stroke->reset();
-			path->extrudeStroke(
-			    m_Stroke, m_StrokeJoin, m_StrokeCap, m_StrokeThickness / 2.0f);
+			path->extrudeStroke(m_Stroke,
+			                    m_StrokeJoin,
+			                    m_StrokeCap,
+			                    m_StrokeThickness / 2.0f,
+			                    identity);
 			m_StrokeDirty = false;
 		}
 

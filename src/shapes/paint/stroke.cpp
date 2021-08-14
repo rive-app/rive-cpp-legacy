@@ -67,6 +67,11 @@ void Stroke::invalidate()
 	{
 		m_Effect->invalidateEffect();
 	}
+	invalidateRendering();
+}
+
+void Stroke::invalidateRendering()
+{
 	assert(m_RenderPaint != nullptr);
 	m_RenderPaint->invalidateStroke();
 }

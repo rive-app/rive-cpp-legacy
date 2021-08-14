@@ -17,6 +17,7 @@ void OpenGLRenderPath::stencil(OpenGLRenderer* renderer, const Mat2D& transform)
 		for (auto& subPath : m_SubPaths)
 		{
 			Mat2D pathTransform;
+			// Mat2D::multiply(pathTransform, transform, subPath.transform());
 			Mat2D::multiply(pathTransform, transform, subPath.transform());
 			reinterpret_cast<OpenGLRenderPath*>(subPath.path())
 			    ->stencil(renderer, pathTransform);
@@ -194,12 +195,8 @@ void OpenGLRenderPath::renderStroke(ContourStroke* stroke,
 	{
 		for (auto& subPath : m_SubPaths)
 		{
-			const Mat2D& subPathTransform = subPath.transform();
-			Mat2D pathTransform;
-			Mat2D::multiply(pathTransform, transform, subPathTransform);
 			reinterpret_cast<OpenGLRenderPath*>(subPath.path())
-			    ->renderStroke(
-			        stroke, renderer, pathTransform, subPathTransform);
+			    ->renderStroke(stroke, renderer, transform, localTransform);
 		}
 		return;
 	}

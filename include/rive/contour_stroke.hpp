@@ -3,6 +3,7 @@
 
 #include "rive/renderer.hpp"
 #include "rive/math/aabb.hpp"
+#include "rive/math/mat2d.hpp"
 #include <vector>
 #include <cstdint>
 
@@ -34,7 +35,8 @@ namespace rive
 		             bool isClosed,
 		             StrokeJoin join,
 		             StrokeCap cap,
-		             float strokeWidth);
+		             float strokeWidth,
+		             const Mat2D& transform);
 	};
 } // namespace rive
 #endif

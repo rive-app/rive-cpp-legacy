@@ -112,7 +112,10 @@ RenderPath* TrimPath::effectPath(MetricsPath* source)
 void TrimPath::invalidateEffect()
 {
 	m_RenderPath = nullptr;
-	parent()->as<Stroke>()->parent()->addDirt(ComponentDirt::Paint);
+	Stroke* stroke = parent()->as<Stroke>();
+	stroke->parent()->addDirt(ComponentDirt::Paint);
+	// Drive this up so the rendering layer can invalidate too.
+	stroke->invalidateRendering();
 }
 
 void TrimPath::startChanged() { invalidateEffect(); }

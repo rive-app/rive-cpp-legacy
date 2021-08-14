@@ -278,6 +278,8 @@ void Path::markPathDirty()
 	if (m_Shape != nullptr)
 	{
 		m_Shape->pathChanged();
+		// We invalidate stroke if the path points change.
+		m_Shape->invalidateStroke();
 	}
 }
 
@@ -286,6 +288,11 @@ void Path::onDirty(ComponentDirt value)
 	if (hasDirt(value, ComponentDirt::WorldTransform) && m_Shape != nullptr)
 	{
 		m_Shape->pathChanged();
+	}
+	if (hasDirt(value, ComponentDirt::Transform) && m_Shape != nullptr)
+	{
+		// We invalidate stroke if a local path transform changes.
+		m_Shape->invalidateStroke();
 	}
 }
 
@@ -298,13 +305,6 @@ void Path::update(ComponentDirt value)
 	{
 		buildPath(*m_CommandPath, isPathClosed(), m_Vertices);
 	}
-	// if (hasDirt(value, ComponentDirt::WorldTransform) && m_Shape != nullptr)
-	// {
-	// 	// Make sure the path composer has an opportunity to rebuild the path
-	// 	// (this is why the composer depends on the shape and all its paths,
-	// 	// ascertaning it updates after both)
-	// 	m_Shape->pathChanged();
-	// }
 }
 
 #ifdef ENABLE_QUERY_FLAT_VERTICES

@@ -110,7 +110,10 @@ int main(int argc, const char** argv)
 	// std::string filename = "assets/juice.riv";
 	// std::string filename = "assets/clip.riv";
 	// std::string filename = "assets/clipped_circle_star_2.riv";
-	std::string filename = "assets/marty.riv";
+	// std::string filename = "assets/marty.riv";
+	std::string filename = "assets/runner.riv";
+	// std::string filename = "assets/rotate_square.riv";
+	// std::string filename = "assets/bone_deform.riv";
 	// std::string filename = "assets/off_road_car.riv";
 	// std::string filename = "assets/simple_stroke.riv";
 	// std::string filename = "assets/leg_issues.riv";
@@ -143,7 +146,7 @@ int main(int argc, const char** argv)
 
 	rive::LinearAnimationInstance* animationInstance = nullptr;
 	int animationIndex = 0;
-	auto animation =
+	rive::LinearAnimation* animation = // nullptr;
 	    animationIndex >= 0 && animationIndex < artboard->animationCount()
 	        ? artboard->animation(animationIndex)
 	        : nullptr;
@@ -179,7 +182,7 @@ int main(int argc, const char** argv)
 		{
 			if (animationInstance != nullptr)
 			{
-				animationInstance->advance(elapsed);
+				animationInstance->advance(elapsed * 0.25f);
 				animationInstance->apply(artboard);
 			}
 			artboard->advance(elapsed);

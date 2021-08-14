@@ -26,13 +26,23 @@ void ContourStroke::extrude(const ContourRenderPath* renderPath,
                             bool isClosed,
                             StrokeJoin join,
                             StrokeCap cap,
-                            float strokeWidth)
+                            float strokeWidth,
+                            const Mat2D& transform)
 {
-	const std::vector<Vec2D>& points = renderPath->contourVertices();
+	// TODO: if transform is identity, no need to copy and transform
+	// contourPoints->points.
+
+	const std::vector<Vec2D>& contourPoints = renderPath->contourVertices();
+	std::vector<Vec2D> points(contourPoints);
 	auto pointCount = points.size();
 	if (pointCount < 6)
 	{
 		return;
+	}
+	for (int i = 4; i < pointCount; i++)
+	{
+		Vec2D& point = points[i];
+		Vec2D::transform(point, point, transform);
 	}
 	auto startOffset = m_TriangleStrip.size();
 	Vec2D lastPoint = points[4];

@@ -69,14 +69,16 @@ bool ContourRenderPath::isContainer() const { return !m_SubPaths.empty(); }
 void ContourRenderPath::extrudeStroke(ContourStroke* stroke,
                                       StrokeJoin join,
                                       StrokeCap cap,
-                                      float strokeWidth)
+                                      float strokeWidth,
+                                      const Mat2D& transform)
 {
 	if (isContainer())
 	{
 		for (auto& subPath : m_SubPaths)
 		{
 			static_cast<ContourRenderPath*>(subPath.path())
-			    ->extrudeStroke(stroke, join, cap, strokeWidth);
+			    ->extrudeStroke(
+			        stroke, join, cap, strokeWidth, subPath.transform());
 		}
 		return;
 	}
@@ -86,6 +88,6 @@ void ContourRenderPath::extrudeStroke(ContourStroke* stroke,
 		computeContour();
 	}
 
-	stroke->extrude(this, m_IsClosed, join, cap, strokeWidth);
+	stroke->extrude(this, m_IsClosed, join, cap, strokeWidth, transform);
 }
 #endif

@@ -266,7 +266,8 @@ void OpenGLRenderer::drawPath(RenderPath* path, RenderPaint* paint)
 		glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
 		glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
-		glPath->stencil(this, transform());
+		auto xform = transform();
+		glPath->stencil(this, xform);
 
 		glColorMask(true, true, true, true);
 		glStencilFunc(GL_NOTEQUAL, 0, m_IsClipping ? 0x7F : 0xFF);
