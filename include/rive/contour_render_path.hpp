@@ -106,7 +106,8 @@ namespace rive
 		void extrudeStroke(ContourStroke* stroke,
 		                   StrokeJoin join,
 		                   StrokeCap cap,
-		                   float strokeWidth);
+		                   float strokeWidth,
+		                   const Mat2D& transform);
 	};
 } // namespace rive
 #endif
