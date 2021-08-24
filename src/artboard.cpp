@@ -512,11 +512,12 @@ StateMachine* Artboard::stateMachine(size_t index) const
 	return m_StateMachines[index];
 }
 
-Artboard* Artboard::instance() const
+Artboard* Artboard::instance(Artboard* instanceObject) const
 {
-	auto artboardClone = clone()->as<Artboard>();
+	// Must be a fresh instance.
+	assert(instanceObject->m_Objects.empty());
 
-	artboardClone->m_Objects.push_back(artboardClone);
+	instanceObject->m_Objects.push_back(instanceObject);
 
 	// Skip first object (artboard).
 	auto itr = m_Objects.begin();
@@ -524,26 +525,32 @@ Artboard* Artboard::instance() const
 	{
 		auto object = *itr;
 
-		artboardClone->m_Objects.push_back(object == nullptr ? nullptr
-		                                                     : object->clone());
+		instanceObject->m_Objects.push_back(
+		    object == nullptr ? nullptr : object->clone());
 	}
 
 	for (auto animation : m_Animations)
 	{
-		artboardClone->m_Animations.push_back(animation);
+		instanceObject->m_Animations.push_back(animation);
 	}
 	for (auto stateMachine : m_StateMachines)
 	{
-		artboardClone->m_StateMachines.push_back(stateMachine);
+		instanceObject->m_StateMachines.push_back(stateMachine);
 	}
 
-	if (artboardClone->initialize() != StatusCode::Ok)
+	if (instanceObject->initialize() != StatusCode::Ok)
 	{
-		delete artboardClone;
-		artboardClone = nullptr;
+		delete instanceObject;
+		instanceObject = nullptr;
 	}
 
-	artboardClone->m_IsInstance = true;
+	instanceObject->m_IsInstance = true;
 
-	return artboardClone;
+	return instanceObject;
+}
+
+Artboard* Artboard::instance() const
+{
+	auto artboardClone = clone()->as<Artboard>();
+	return instance(artboardClone);
 }

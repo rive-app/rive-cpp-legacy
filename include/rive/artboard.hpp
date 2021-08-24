@@ -97,6 +97,10 @@ namespace rive
 		/// longer needed.
 		Artboard* instance() const;
 
+		/// Make an instance of this artboard using a concrete object, allowing
+		/// for inheriting from Artboard to add runtime specific functionality.
+		Artboard* instance(Artboard* instanceObject) const;
+
 		/// Returns true if the artboard is an instance of another
 		bool isInstance() const { return m_IsInstance; }
 	};
