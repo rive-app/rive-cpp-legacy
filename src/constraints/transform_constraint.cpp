@@ -1,7 +1,9 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "rive/constraints/transform_constraint.hpp"
 #include "rive/transform_component.hpp"
 #include "rive/math/mat2d.hpp"
-#include <cmath>
 
 using namespace rive;
 

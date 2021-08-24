@@ -1,7 +1,11 @@
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <algorithm>
+
 #include "rive/constraints/ik_constraint.hpp"
 #include "rive/bones/bone.hpp"
 #include "rive/artboard.hpp"
-#include <algorithm>
 
 using namespace rive;
 
