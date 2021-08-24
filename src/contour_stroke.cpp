@@ -1,7 +1,12 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <algorithm>
+
 #ifdef LOW_LEVEL_RENDERING
 #include "rive/contour_stroke.hpp"
 #include "rive/contour_render_path.hpp"
 #include "rive/math/vec2d.hpp"
+#include <assert.h>
 
 using namespace rive;
 

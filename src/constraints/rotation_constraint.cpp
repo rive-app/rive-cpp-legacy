@@ -1,7 +1,10 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <algorithm>
+
 #include "rive/constraints/rotation_constraint.hpp"
 #include "rive/transform_component.hpp"
 #include "rive/math/mat2d.hpp"
-#include <cmath>
 
 using namespace rive;
 
