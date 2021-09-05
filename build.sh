@@ -17,6 +17,9 @@ then
 elif [ "$OPTION" = "release" ]
 then
     premake5 gmake2 && make config=release -j7
+elif [ "$OPTION" = "android" ]
+then
+    premake5 --with-low-level-rendering gmake2 && make config=release -j7
 else
     premake5 gmake2 && make -j7
 fi

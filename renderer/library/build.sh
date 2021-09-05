@@ -16,11 +16,14 @@ then
     echo build.sh release - build release library 
 elif [ "$OPTION" = "clean" ]
 then
-    echo Cleaning project ...
+    echo Cleaning renderer_library project ...
     premake5 clean
 elif [ "$OPTION" = "release" ]
 then
-    premake5 gmake && make config=release -j7
+    premake5 --for-macos gmake && make config=release -j7
+elif [ "$OPTION" = "android" ]
+then
+    premake5 --for-android gmake && make config=release -j7
 else
-    premake5 gmake && make -j7
+    premake5 --for-macos gmake && make -j7
 fi
