@@ -27,17 +27,19 @@ defines {"RELEASE"}
 optimize "On"
 
 configuration "for-android"
-    links {"rive"}
-    defines {"RIVE_HAS_OPENGL", "ANDROID", "GL_SILENCE_DEPRECATION"}
-    libdirs {"../../../build/bin/%{cfg.buildcfg}"}
+links {"rive"}
+defines {"RIVE_HAS_OPENGL", "ANDROID", "GL_SILENCE_DEPRECATION"}
+libdirs {"../../../build/bin/%{cfg.buildcfg}"}
 
 configuration "for-macos"
-    links {"Cocoa.framework", "rive"}
-    defines {"RIVE_HAS_METAL", "RIVE_HAS_OPENGL"}
-    defines {"GL_SILENCE_DEPRECATION"}
-    includedirs {"../../dependencies/DiligentEngine_build/build/include"}
-    files {"../src/**.mm"}
-    libdirs {"../../../build/bin/%{cfg.buildcfg}", "../../dependencies/skia/out/Static"}
+links {"Cocoa.framework", "rive"}
+defines {"RIVE_HAS_METAL", "RIVE_HAS_OPENGL"}
+defines {"GL_SILENCE_DEPRECATION"}
+includedirs {"../../dependencies/DiligentEngine_build/build/include"}
+files {"../src/**.mm"}
+libdirs {
+    "../../../build/bin/%{cfg.buildcfg}", "../../dependencies/skia/out/Static"
+}
 
 -- Clean Function --
 newaction {

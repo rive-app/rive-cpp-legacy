@@ -19,7 +19,7 @@ if [ ! -d skia ]; then
     git clone $SKIA_REPO
 else
     echo "Already have Skia, update it."
-    cd skia && git checkout master && git fetch && git pull
+    cd skia && git checkout main && git fetch && git pull
     cd ..
 fi
 
