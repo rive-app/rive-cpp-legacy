@@ -9,7 +9,7 @@ set -e
 # GLFW requires CMake
 
 SKIA_REPO=https://github.com/google/skia
-SKIA_STABLE_BRANCH=chrome/m87
+SKIA_STABLE_BRANCH=chrome/m95
 
 # -----------------------------
 # Get & Build Skia
@@ -53,7 +53,6 @@ bin/gn gen out/Static --args=" \
     skia_use_gl=true \
     skia_use_zlib=true \
     skia_use_system_zlib=false \
-    skia_enable_ccpr=true \
     skia_enable_gpu=true \
     skia_enable_fontmgr_empty=false \
     skia_enable_spirv_validation=false \

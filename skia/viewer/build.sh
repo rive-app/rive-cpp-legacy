@@ -25,5 +25,3 @@ elif [ "$OPTION" = "release" ]; then
 else
     premake5 gmake && make -j7
 fi
-
-set +e
