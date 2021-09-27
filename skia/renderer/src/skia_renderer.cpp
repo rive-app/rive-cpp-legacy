@@ -143,8 +143,8 @@ void SkiaRenderer::clipPath(RenderPath* path)
 	m_Canvas->clipPath(reinterpret_cast<SkiaRenderPath*>(path)->path(), true);
 }
 
-namespace rive
-{
-	RenderPath* makeRenderPath() { return new SkiaRenderPath(); }
-	RenderPaint* makeRenderPaint() { return new SkiaRenderPaint(); }
-} // namespace rive
+// namespace rive
+// {
+// 	RenderPath* makeRenderPath() { return new SkiaRenderPath(); }
+// 	RenderPaint* makeRenderPaint() { return new SkiaRenderPaint(); }
+// } // namespace rive
