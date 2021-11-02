@@ -17,7 +17,7 @@ SKIA_STABLE_BRANCH=chrome/m95
 if [ ! -d skia ]; then
     echo "Cloning Skia stable branch..."
     # TODO:(umberto) --depth 1 test
-    git clone -b $SKIA_STABLE_BRANCH --depth 1 $SKIA_REPO
+    git clone -b $SKIA_STABLE_BRANCH $SKIA_REPO
 fi
 
 ARCH=$1
