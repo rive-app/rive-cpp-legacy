@@ -1,24 +1,77 @@
 #!/bin/bash
+set -e
 
 pushd build &>/dev/null
 
-OPTION=$1
+while getopts p: flag; do
+    case "${flag}" in
+    p)
+        shift 2
+        platform=${OPTARG}
+        ;;
+    \?) help ;;
+    esac
+done
 
-if [ "$OPTION" = 'help' ]
-then
+help() {
     echo build.sh - build debug library
     echo build.sh clean - clean the build
-    echo build.sh release - build release library 
-elif [ "$OPTION" = "clean" ]
-then
-    echo Cleaning project ...
-    premake5 gmake2 && make clean && make clean config=release
+    echo build.sh release - build release library
+    echo build.sh -p ios release - build release ios library
+    echo build.sh -p android release - build release android library
+    exit 1
+}
 
-elif [ "$OPTION" = "release" ]
-then
-    premake5 gmake2 && make config=release -j7
+# make sure argument is lowercase
+OPTION="$(echo "$1" | tr '[A-Z]' '[a-z]')"
+
+if [ "$OPTION" = 'help' ]; then
+    help
 else
-    premake5 gmake2 && make -j7
+    build() {
+        echo "Building Rive for platform=$platform option=$OPTION"
+        echo premake5 gmake2 "$1"
+        PREMAKE="premake5 gmake2 $1"
+        eval "$PREMAKE"
+        if [ "$OPTION" = "clean" ]; then
+            make clean
+            make clean config=release
+        elif [ "$OPTION" = "release" ]; then
+            make config=release -j7
+        else
+            make -j7
+        fi
+    }
+
+    case $platform in
+    ios)
+        echo "Building for iOS"
+        export IOS_SYSROOT=$(xcrun --sdk iphoneos --show-sdk-path)
+        build "--os=ios"
+        export IOS_SYSROOT=$(xcrun --sdk iphonesimulator --show-sdk-path)
+        build "--os=ios --variant=emulator"
+        if [ "$OPTION" = "clean" ]; then
+            exit
+        elif [ "$OPTION" = "release" ]; then
+            config="release"
+        else
+            config="debug"
+        fi
+        ;;
+    # Android supports ABIs via a custom platform format:
+    #   e.g. 'android.x86', 'android.x64', etc.
+    android*)
+        echo "Building for ${platform}"
+        # Extract ABI from this opt by splitting on '.' character
+        #   e.g. android.x86
+        IFS="." read -ra strarr <<<"$platform"
+        ARCH=${strarr[1]}
+        build "--os=android --arch=${ARCH}"
+        ;;
+    *)
+        build
+        ;;
+    esac
 fi
 
 popd &>/dev/null

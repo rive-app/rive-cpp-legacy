@@ -2,7 +2,6 @@
 #define _RIVE_MAT2D_HPP_
 
 #include <cstddef>
-#include <stdio.h>
 
 namespace rive
 {
@@ -58,6 +57,13 @@ namespace rive
 			printf("Y: %f %f\n", m_Buffer[2], m_Buffer[3]);
 			printf("T: %f %f\n", m_Buffer[4], m_Buffer[5]);
 		}
+
+		void xx(float value) { m_Buffer[0] = value; }
+		void xy(float value) { m_Buffer[1] = value; }
+		void yx(float value) { m_Buffer[2] = value; }
+		void yy(float value) { m_Buffer[3] = value; }
+		void tx(float value) { m_Buffer[4] = value; }
+		void ty(float value) { m_Buffer[5] = value; }
 	};
 
 	inline Mat2D operator*(const Mat2D& a, const Mat2D& b)

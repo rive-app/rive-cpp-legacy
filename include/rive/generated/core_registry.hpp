@@ -22,6 +22,10 @@
 #include "rive/animation/keyframe_id.hpp"
 #include "rive/animation/layer_state.hpp"
 #include "rive/animation/linear_animation.hpp"
+#include "rive/animation/nested_linear_animation.hpp"
+#include "rive/animation/nested_remap_animation.hpp"
+#include "rive/animation/nested_simple_animation.hpp"
+#include "rive/animation/nested_state_machine.hpp"
 #include "rive/animation/state_machine.hpp"
 #include "rive/animation/state_machine_bool.hpp"
 #include "rive/animation/state_machine_component.hpp"
@@ -37,6 +41,12 @@
 #include "rive/animation/transition_trigger_condition.hpp"
 #include "rive/animation/transition_value_condition.hpp"
 #include "rive/artboard.hpp"
+#include "rive/assets/asset.hpp"
+#include "rive/assets/drawable_asset.hpp"
+#include "rive/assets/file_asset.hpp"
+#include "rive/assets/file_asset_contents.hpp"
+#include "rive/assets/folder.hpp"
+#include "rive/assets/image_asset.hpp"
 #include "rive/backboard.hpp"
 #include "rive/bones/bone.hpp"
 #include "rive/bones/cubic_weight.hpp"
@@ -61,6 +71,8 @@
 #include "rive/draw_rules.hpp"
 #include "rive/draw_target.hpp"
 #include "rive/drawable.hpp"
+#include "rive/nested_animation.hpp"
+#include "rive/nested_artboard.hpp"
 #include "rive/node.hpp"
 #include "rive/shapes/clipping_shape.hpp"
 #include "rive/shapes/cubic_asymmetric_vertex.hpp"
@@ -68,6 +80,7 @@
 #include "rive/shapes/cubic_mirrored_vertex.hpp"
 #include "rive/shapes/cubic_vertex.hpp"
 #include "rive/shapes/ellipse.hpp"
+#include "rive/shapes/image.hpp"
 #include "rive/shapes/paint/fill.hpp"
 #include "rive/shapes/paint/gradient_stop.hpp"
 #include "rive/shapes/paint/linear_gradient.hpp"
@@ -111,6 +124,12 @@ namespace rive
 					return new ScaleConstraint();
 				case RotationConstraintBase::typeKey:
 					return new RotationConstraint();
+				case NodeBase::typeKey:
+					return new Node();
+				case NestedArtboardBase::typeKey:
+					return new NestedArtboard();
+				case NestedSimpleAnimationBase::typeKey:
+					return new NestedSimpleAnimation();
 				case AnimationStateBase::typeKey:
 					return new AnimationState();
 				case KeyedObjectBase::typeKey:
@@ -153,10 +172,14 @@ namespace rive
 					return new StateMachineTrigger();
 				case BlendStateDirectBase::typeKey:
 					return new BlendStateDirect();
+				case NestedStateMachineBase::typeKey:
+					return new NestedStateMachine();
 				case ExitStateBase::typeKey:
 					return new ExitState();
 				case BlendState1DBase::typeKey:
 					return new BlendState1D();
+				case NestedRemapAnimationBase::typeKey:
+					return new NestedRemapAnimation();
 				case TransitionBoolConditionBase::typeKey:
 					return new TransitionBoolCondition();
 				case BlendStateTransitionBase::typeKey:
@@ -179,8 +202,6 @@ namespace rive
 					return new TrimPath();
 				case FillBase::typeKey:
 					return new Fill();
-				case NodeBase::typeKey:
-					return new Node();
 				case ShapeBase::typeKey:
 					return new Shape();
 				case StraightVertexBase::typeKey:
@@ -203,6 +224,8 @@ namespace rive
 					return new Polygon();
 				case StarBase::typeKey:
 					return new Star();
+				case ImageBase::typeKey:
+					return new Image();
 				case CubicDetachedVertexBase::typeKey:
 					return new CubicDetachedVertex();
 				case DrawRulesBase::typeKey:
@@ -223,6 +246,12 @@ namespace rive
 					return new Tendon();
 				case CubicWeightBase::typeKey:
 					return new CubicWeight();
+				case FolderBase::typeKey:
+					return new Folder();
+				case ImageAssetBase::typeKey:
+					return new ImageAsset();
+				case FileAssetContentsBase::typeKey:
+					return new FileAssetContents();
 			}
 			return nullptr;
 		}
@@ -238,6 +267,9 @@ namespace rive
 					break;
 				case AnimationBase::namePropertyKey:
 					object->as<AnimationBase>()->name(value);
+					break;
+				case AssetBase::namePropertyKey:
+					object->as<AssetBase>()->name(value);
 					break;
 			}
 		}
@@ -275,6 +307,18 @@ namespace rive
 					break;
 				case IKConstraintBase::parentBoneCountPropertyKey:
 					object->as<IKConstraintBase>()->parentBoneCount(value);
+					break;
+				case DrawableBase::blendModeValuePropertyKey:
+					object->as<DrawableBase>()->blendModeValue(value);
+					break;
+				case DrawableBase::drawableFlagsPropertyKey:
+					object->as<DrawableBase>()->drawableFlags(value);
+					break;
+				case NestedArtboardBase::artboardIdPropertyKey:
+					object->as<NestedArtboardBase>()->artboardId(value);
+					break;
+				case NestedAnimationBase::animationIdPropertyKey:
+					object->as<NestedAnimationBase>()->animationId(value);
 					break;
 				case AnimationStateBase::animationIdPropertyKey:
 					object->as<AnimationStateBase>()->animationId(value);
@@ -358,12 +402,6 @@ namespace rive
 				case PathBase::pathFlagsPropertyKey:
 					object->as<PathBase>()->pathFlags(value);
 					break;
-				case DrawableBase::blendModeValuePropertyKey:
-					object->as<DrawableBase>()->blendModeValue(value);
-					break;
-				case DrawableBase::drawableFlagsPropertyKey:
-					object->as<DrawableBase>()->drawableFlags(value);
-					break;
 				case ClippingShapeBase::sourceIdPropertyKey:
 					object->as<ClippingShapeBase>()->sourceId(value);
 					break;
@@ -372,6 +410,9 @@ namespace rive
 					break;
 				case PolygonBase::pointsPropertyKey:
 					object->as<PolygonBase>()->points(value);
+					break;
+				case ImageBase::assetIdPropertyKey:
+					object->as<ImageBase>()->assetId(value);
 					break;
 				case DrawRulesBase::drawTargetIdPropertyKey:
 					object->as<DrawRulesBase>()->drawTargetId(value);
@@ -396,6 +437,9 @@ namespace rive
 					break;
 				case CubicWeightBase::outIndicesPropertyKey:
 					object->as<CubicWeightBase>()->outIndices(value);
+					break;
+				case FileAssetBase::assetIdPropertyKey:
+					object->as<FileAssetBase>()->assetId(value);
 					break;
 			}
 		}
@@ -433,6 +477,30 @@ namespace rive
 					object->as<TransformComponentConstraintYBase>()->maxValueY(
 					    value);
 					break;
+				case WorldTransformComponentBase::opacityPropertyKey:
+					object->as<WorldTransformComponentBase>()->opacity(value);
+					break;
+				case TransformComponentBase::rotationPropertyKey:
+					object->as<TransformComponentBase>()->rotation(value);
+					break;
+				case TransformComponentBase::scaleXPropertyKey:
+					object->as<TransformComponentBase>()->scaleX(value);
+					break;
+				case TransformComponentBase::scaleYPropertyKey:
+					object->as<TransformComponentBase>()->scaleY(value);
+					break;
+				case NodeBase::xPropertyKey:
+					object->as<NodeBase>()->x(value);
+					break;
+				case NodeBase::yPropertyKey:
+					object->as<NodeBase>()->y(value);
+					break;
+				case NestedLinearAnimationBase::mixPropertyKey:
+					object->as<NestedLinearAnimationBase>()->mix(value);
+					break;
+				case NestedSimpleAnimationBase::speedPropertyKey:
+					object->as<NestedSimpleAnimationBase>()->speed(value);
+					break;
 				case StateMachineNumberBase::valuePropertyKey:
 					object->as<StateMachineNumberBase>()->value(value);
 					break;
@@ -456,6 +524,9 @@ namespace rive
 					break;
 				case LinearAnimationBase::speedPropertyKey:
 					object->as<LinearAnimationBase>()->speed(value);
+					break;
+				case NestedRemapAnimationBase::timePropertyKey:
+					object->as<NestedRemapAnimationBase>()->time(value);
 					break;
 				case BlendAnimation1DBase::valuePropertyKey:
 					object->as<BlendAnimation1DBase>()->value(value);
@@ -489,24 +560,6 @@ namespace rive
 					break;
 				case TrimPathBase::offsetPropertyKey:
 					object->as<TrimPathBase>()->offset(value);
-					break;
-				case WorldTransformComponentBase::opacityPropertyKey:
-					object->as<WorldTransformComponentBase>()->opacity(value);
-					break;
-				case TransformComponentBase::rotationPropertyKey:
-					object->as<TransformComponentBase>()->rotation(value);
-					break;
-				case TransformComponentBase::scaleXPropertyKey:
-					object->as<TransformComponentBase>()->scaleX(value);
-					break;
-				case TransformComponentBase::scaleYPropertyKey:
-					object->as<TransformComponentBase>()->scaleY(value);
-					break;
-				case NodeBase::xPropertyKey:
-					object->as<NodeBase>()->x(value);
-					break;
-				case NodeBase::yPropertyKey:
-					object->as<NodeBase>()->y(value);
 					break;
 				case PathVertexBase::xPropertyKey:
 					object->as<PathVertexBase>()->x(value);
@@ -637,6 +690,12 @@ namespace rive
 				case TendonBase::tyPropertyKey:
 					object->as<TendonBase>()->ty(value);
 					break;
+				case DrawableAssetBase::heightPropertyKey:
+					object->as<DrawableAssetBase>()->height(value);
+					break;
+				case DrawableAssetBase::widthPropertyKey:
+					object->as<DrawableAssetBase>()->width(value);
+					break;
 			}
 		}
 		static void setBool(Core* object, int propertyKey, bool value)
@@ -671,6 +730,9 @@ namespace rive
 					break;
 				case IKConstraintBase::invertDirectionPropertyKey:
 					object->as<IKConstraintBase>()->invertDirection(value);
+					break;
+				case NestedSimpleAnimationBase::isPlayingPropertyKey:
+					object->as<NestedSimpleAnimationBase>()->isPlaying(value);
 					break;
 				case KeyFrameBoolBase::valuePropertyKey:
 					object->as<KeyFrameBoolBase>()->value(value);
@@ -716,6 +778,16 @@ namespace rive
 					break;
 			}
 		}
+		static void
+		setBytes(Core* object, int propertyKey, std::vector<uint8_t> value)
+		{
+			switch (propertyKey)
+			{
+				case FileAssetContentsBase::bytesPropertyKey:
+					object->as<FileAssetContentsBase>()->bytes(value);
+					break;
+			}
+		}
 		static std::string getString(Core* object, int propertyKey)
 		{
 			switch (propertyKey)
@@ -726,6 +798,8 @@ namespace rive
 					return object->as<StateMachineComponentBase>()->name();
 				case AnimationBase::namePropertyKey:
 					return object->as<AnimationBase>()->name();
+				case AssetBase::namePropertyKey:
+					return object->as<AssetBase>()->name();
 			}
 			return "";
 		}
@@ -755,6 +829,14 @@ namespace rive
 					    ->minMaxSpaceValue();
 				case IKConstraintBase::parentBoneCountPropertyKey:
 					return object->as<IKConstraintBase>()->parentBoneCount();
+				case DrawableBase::blendModeValuePropertyKey:
+					return object->as<DrawableBase>()->blendModeValue();
+				case DrawableBase::drawableFlagsPropertyKey:
+					return object->as<DrawableBase>()->drawableFlags();
+				case NestedArtboardBase::artboardIdPropertyKey:
+					return object->as<NestedArtboardBase>()->artboardId();
+				case NestedAnimationBase::animationIdPropertyKey:
+					return object->as<NestedAnimationBase>()->animationId();
 				case AnimationStateBase::animationIdPropertyKey:
 					return object->as<AnimationStateBase>()->animationId();
 				case KeyedObjectBase::objectIdPropertyKey:
@@ -811,16 +893,14 @@ namespace rive
 					return object->as<FillBase>()->fillRule();
 				case PathBase::pathFlagsPropertyKey:
 					return object->as<PathBase>()->pathFlags();
-				case DrawableBase::blendModeValuePropertyKey:
-					return object->as<DrawableBase>()->blendModeValue();
-				case DrawableBase::drawableFlagsPropertyKey:
-					return object->as<DrawableBase>()->drawableFlags();
 				case ClippingShapeBase::sourceIdPropertyKey:
 					return object->as<ClippingShapeBase>()->sourceId();
 				case ClippingShapeBase::fillRulePropertyKey:
 					return object->as<ClippingShapeBase>()->fillRule();
 				case PolygonBase::pointsPropertyKey:
 					return object->as<PolygonBase>()->points();
+				case ImageBase::assetIdPropertyKey:
+					return object->as<ImageBase>()->assetId();
 				case DrawRulesBase::drawTargetIdPropertyKey:
 					return object->as<DrawRulesBase>()->drawTargetId();
 				case WeightBase::valuesPropertyKey:
@@ -837,6 +917,8 @@ namespace rive
 					return object->as<CubicWeightBase>()->outValues();
 				case CubicWeightBase::outIndicesPropertyKey:
 					return object->as<CubicWeightBase>()->outIndices();
+				case FileAssetBase::assetIdPropertyKey:
+					return object->as<FileAssetBase>()->assetId();
 			}
 			return 0;
 		}
@@ -866,6 +948,22 @@ namespace rive
 				case TransformComponentConstraintYBase::maxValueYPropertyKey:
 					return object->as<TransformComponentConstraintYBase>()
 					    ->maxValueY();
+				case WorldTransformComponentBase::opacityPropertyKey:
+					return object->as<WorldTransformComponentBase>()->opacity();
+				case TransformComponentBase::rotationPropertyKey:
+					return object->as<TransformComponentBase>()->rotation();
+				case TransformComponentBase::scaleXPropertyKey:
+					return object->as<TransformComponentBase>()->scaleX();
+				case TransformComponentBase::scaleYPropertyKey:
+					return object->as<TransformComponentBase>()->scaleY();
+				case NodeBase::xPropertyKey:
+					return object->as<NodeBase>()->x();
+				case NodeBase::yPropertyKey:
+					return object->as<NodeBase>()->y();
+				case NestedLinearAnimationBase::mixPropertyKey:
+					return object->as<NestedLinearAnimationBase>()->mix();
+				case NestedSimpleAnimationBase::speedPropertyKey:
+					return object->as<NestedSimpleAnimationBase>()->speed();
 				case StateMachineNumberBase::valuePropertyKey:
 					return object->as<StateMachineNumberBase>()->value();
 				case TransitionNumberConditionBase::valuePropertyKey:
@@ -882,6 +980,8 @@ namespace rive
 					return object->as<KeyFrameDoubleBase>()->value();
 				case LinearAnimationBase::speedPropertyKey:
 					return object->as<LinearAnimationBase>()->speed();
+				case NestedRemapAnimationBase::timePropertyKey:
+					return object->as<NestedRemapAnimationBase>()->time();
 				case BlendAnimation1DBase::valuePropertyKey:
 					return object->as<BlendAnimation1DBase>()->value();
 				case LinearGradientBase::startXPropertyKey:
@@ -904,18 +1004,6 @@ namespace rive
 					return object->as<TrimPathBase>()->end();
 				case TrimPathBase::offsetPropertyKey:
 					return object->as<TrimPathBase>()->offset();
-				case WorldTransformComponentBase::opacityPropertyKey:
-					return object->as<WorldTransformComponentBase>()->opacity();
-				case TransformComponentBase::rotationPropertyKey:
-					return object->as<TransformComponentBase>()->rotation();
-				case TransformComponentBase::scaleXPropertyKey:
-					return object->as<TransformComponentBase>()->scaleX();
-				case TransformComponentBase::scaleYPropertyKey:
-					return object->as<TransformComponentBase>()->scaleY();
-				case NodeBase::xPropertyKey:
-					return object->as<NodeBase>()->x();
-				case NodeBase::yPropertyKey:
-					return object->as<NodeBase>()->y();
 				case PathVertexBase::xPropertyKey:
 					return object->as<PathVertexBase>()->x();
 				case PathVertexBase::yPropertyKey:
@@ -1004,6 +1092,10 @@ namespace rive
 					return object->as<TendonBase>()->tx();
 				case TendonBase::tyPropertyKey:
 					return object->as<TendonBase>()->ty();
+				case DrawableAssetBase::heightPropertyKey:
+					return object->as<DrawableAssetBase>()->height();
+				case DrawableAssetBase::widthPropertyKey:
+					return object->as<DrawableAssetBase>()->width();
 			}
 			return 0.0f;
 		}
@@ -1034,6 +1126,8 @@ namespace rive
 					    ->maxY();
 				case IKConstraintBase::invertDirectionPropertyKey:
 					return object->as<IKConstraintBase>()->invertDirection();
+				case NestedSimpleAnimationBase::isPlayingPropertyKey:
+					return object->as<NestedSimpleAnimationBase>()->isPlaying();
 				case KeyFrameBoolBase::valuePropertyKey:
 					return object->as<KeyFrameBoolBase>()->value();
 				case LinearAnimationBase::enableWorkAreaPropertyKey:
@@ -1068,6 +1162,15 @@ namespace rive
 			}
 			return 0;
 		}
+		static std::vector<uint8_t> getBytes(Core* object, int propertyKey)
+		{
+			switch (propertyKey)
+			{
+				case FileAssetContentsBase::bytesPropertyKey:
+					return object->as<FileAssetContentsBase>()->bytes();
+			}
+			return std::vector<uint8_t>();
+		}
 		static int propertyFieldId(int propertyKey)
 		{
 			switch (propertyKey)
@@ -1075,6 +1178,7 @@ namespace rive
 				case ComponentBase::namePropertyKey:
 				case StateMachineComponentBase::namePropertyKey:
 				case AnimationBase::namePropertyKey:
+				case AssetBase::namePropertyKey:
 					return CoreStringType::id;
 				case ComponentBase::parentIdPropertyKey:
 				case DrawTargetBase::drawableIdPropertyKey:
@@ -1086,6 +1190,10 @@ namespace rive
 				case TransformComponentConstraintBase::
 				    minMaxSpaceValuePropertyKey:
 				case IKConstraintBase::parentBoneCountPropertyKey:
+				case DrawableBase::blendModeValuePropertyKey:
+				case DrawableBase::drawableFlagsPropertyKey:
+				case NestedArtboardBase::artboardIdPropertyKey:
+				case NestedAnimationBase::animationIdPropertyKey:
 				case AnimationStateBase::animationIdPropertyKey:
 				case KeyedObjectBase::objectIdPropertyKey:
 				case BlendAnimationBase::animationIdPropertyKey:
@@ -1113,11 +1221,10 @@ namespace rive
 				case TrimPathBase::modeValuePropertyKey:
 				case FillBase::fillRulePropertyKey:
 				case PathBase::pathFlagsPropertyKey:
-				case DrawableBase::blendModeValuePropertyKey:
-				case DrawableBase::drawableFlagsPropertyKey:
 				case ClippingShapeBase::sourceIdPropertyKey:
 				case ClippingShapeBase::fillRulePropertyKey:
 				case PolygonBase::pointsPropertyKey:
+				case ImageBase::assetIdPropertyKey:
 				case DrawRulesBase::drawTargetIdPropertyKey:
 				case WeightBase::valuesPropertyKey:
 				case WeightBase::indicesPropertyKey:
@@ -1126,6 +1233,7 @@ namespace rive
 				case CubicWeightBase::inIndicesPropertyKey:
 				case CubicWeightBase::outValuesPropertyKey:
 				case CubicWeightBase::outIndicesPropertyKey:
+				case FileAssetBase::assetIdPropertyKey:
 					return CoreUintType::id;
 				case ConstraintBase::strengthPropertyKey:
 				case DistanceConstraintBase::distancePropertyKey:
@@ -1135,6 +1243,14 @@ namespace rive
 				case TransformComponentConstraintYBase::copyFactorYPropertyKey:
 				case TransformComponentConstraintYBase::minValueYPropertyKey:
 				case TransformComponentConstraintYBase::maxValueYPropertyKey:
+				case WorldTransformComponentBase::opacityPropertyKey:
+				case TransformComponentBase::rotationPropertyKey:
+				case TransformComponentBase::scaleXPropertyKey:
+				case TransformComponentBase::scaleYPropertyKey:
+				case NodeBase::xPropertyKey:
+				case NodeBase::yPropertyKey:
+				case NestedLinearAnimationBase::mixPropertyKey:
+				case NestedSimpleAnimationBase::speedPropertyKey:
 				case StateMachineNumberBase::valuePropertyKey:
 				case TransitionNumberConditionBase::valuePropertyKey:
 				case CubicInterpolatorBase::x1PropertyKey:
@@ -1143,6 +1259,7 @@ namespace rive
 				case CubicInterpolatorBase::y2PropertyKey:
 				case KeyFrameDoubleBase::valuePropertyKey:
 				case LinearAnimationBase::speedPropertyKey:
+				case NestedRemapAnimationBase::timePropertyKey:
 				case BlendAnimation1DBase::valuePropertyKey:
 				case LinearGradientBase::startXPropertyKey:
 				case LinearGradientBase::startYPropertyKey:
@@ -1154,12 +1271,6 @@ namespace rive
 				case TrimPathBase::startPropertyKey:
 				case TrimPathBase::endPropertyKey:
 				case TrimPathBase::offsetPropertyKey:
-				case WorldTransformComponentBase::opacityPropertyKey:
-				case TransformComponentBase::rotationPropertyKey:
-				case TransformComponentBase::scaleXPropertyKey:
-				case TransformComponentBase::scaleYPropertyKey:
-				case NodeBase::xPropertyKey:
-				case NodeBase::yPropertyKey:
 				case PathVertexBase::xPropertyKey:
 				case PathVertexBase::yPropertyKey:
 				case StraightVertexBase::radiusPropertyKey:
@@ -1203,6 +1314,8 @@ namespace rive
 				case TendonBase::yyPropertyKey:
 				case TendonBase::txPropertyKey:
 				case TendonBase::tyPropertyKey:
+				case DrawableAssetBase::heightPropertyKey:
+				case DrawableAssetBase::widthPropertyKey:
 					return CoreDoubleType::id;
 				case TransformComponentConstraintBase::offsetPropertyKey:
 				case TransformComponentConstraintBase::doesCopyPropertyKey:
@@ -1212,6 +1325,7 @@ namespace rive
 				case TransformComponentConstraintYBase::minYPropertyKey:
 				case TransformComponentConstraintYBase::maxYPropertyKey:
 				case IKConstraintBase::invertDirectionPropertyKey:
+				case NestedSimpleAnimationBase::isPlayingPropertyKey:
 				case KeyFrameBoolBase::valuePropertyKey:
 				case LinearAnimationBase::enableWorkAreaPropertyKey:
 				case StateMachineBoolBase::valuePropertyKey:
@@ -1226,6 +1340,8 @@ namespace rive
 				case SolidColorBase::colorValuePropertyKey:
 				case GradientStopBase::colorValuePropertyKey:
 					return CoreColorType::id;
+				case FileAssetContentsBase::bytesPropertyKey:
+					return CoreBytesType::id;
 				default:
 					return -1;
 			}

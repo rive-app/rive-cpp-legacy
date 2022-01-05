@@ -13,8 +13,8 @@ project "rive_recorder"
 kind "ConsoleApp"
 language "C++"
 cppdialect "C++17"
-targetdir "bin/%{cfg.buildcfg}"
-objdir "obj/%{cfg.buildcfg}"
+targetdir "%{cfg.system}/bin/%{cfg.buildcfg}"
+objdir "%{cfg.system}/obj/%{cfg.buildcfg}"
 includedirs {
     "../include",
     "../../../include",
@@ -82,7 +82,7 @@ else
 end 
 
 libdirs {
-    "../../../build/bin/%{cfg.buildcfg}",
+    "../../../build/%{cfg.system}/bin/%{cfg.buildcfg}",
     "../../dependencies/FFmpeg/libavcodec",
     "../../dependencies/FFmpeg/libavformat",
     "../../dependencies/FFmpeg/libavfilter",
@@ -90,9 +90,9 @@ libdirs {
     "../../dependencies/FFmpeg/libswscale",
     "../../dependencies/FFmpeg/libswresample",
     "../../dependencies/x264/lib",
-    "../../dependencies/skia/out/Static",
+    "../../dependencies/skia/out/static",
     "../../dependencies/libzip_build/lib",
-    "../../renderer/build/bin/%{cfg.buildcfg}",
+    "../../renderer/build/%{cfg.system}/bin/%{cfg.buildcfg}",
     "/usr/local/lib",
     "/usr/lib",
 }

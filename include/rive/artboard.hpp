@@ -15,6 +15,7 @@ namespace rive
 	class Node;
 	class DrawTarget;
 	class ArtboardImporter;
+	class NestedArtboard;
 
 	class Artboard : public ArtboardBase,
 	                 public CoreContext,
@@ -31,11 +32,14 @@ namespace rive
 		std::vector<Component*> m_DependencyOrder;
 		std::vector<Drawable*> m_Drawables;
 		std::vector<DrawTarget*> m_DrawTargets;
+		std::vector<NestedArtboard*> m_NestedArtboards;
+
 		unsigned int m_DirtDepth = 0;
 		CommandPath* m_BackgroundPath = nullptr;
 		CommandPath* m_ClipPath = nullptr;
 		Drawable* m_FirstDrawable = nullptr;
 		bool m_IsInstance = false;
+		bool m_FrameOrigin = true;
 
 		void sortDependencies();
 		void sortDrawOrder();
@@ -46,6 +50,7 @@ namespace rive
 		void addObject(Core* object);
 		void addAnimation(LinearAnimation* object);
 		void addStateMachine(StateMachine* object);
+		void addNestedArtboard(NestedArtboard* object);
 
 	public:
 		~Artboard();
@@ -103,6 +108,20 @@ namespace rive
 
 		/// Returns true if the artboard is an instance of another
 		bool isInstance() const { return m_IsInstance; }
+
+		/// Returns true when the artboard will shift the origin from the top
+		/// left to the relative width/height of the artboard itself. This is
+		/// what the editor does visually when you change the origin value to
+		/// give context as to where the origin lies within the framed bounds.
+		bool frameOrigin() const { return m_FrameOrigin; }
+		/// When composing multiple artboards together in a common world-space,
+		/// it may be desireable to have them share the same space regardless of
+		/// origin offset from the bounding artboard. Set frameOrigin to false
+		/// to move the bounds relative to the origin instead of the origin
+		/// relative to the bounds.
+		void frameOrigin(bool value);
+
+		StatusCode import(ImportStack& importStack) override;
 	};
 } // namespace rive
 

@@ -6,6 +6,8 @@
 #include "rive/core/field_types/core_uint_type.hpp"
 #include "rive/generated/core_registry.hpp"
 #include "rive/importers/artboard_importer.hpp"
+#include "rive/importers/backboard_importer.hpp"
+#include "rive/importers/file_asset_importer.hpp"
 #include "rive/importers/import_stack.hpp"
 #include "rive/importers/keyed_object_importer.hpp"
 #include "rive/importers/keyed_property_importer.hpp"
@@ -26,19 +28,22 @@
 using namespace rive;
 
 #if !defined(RIVE_FMT_U64)
-	#if defined(__ANDROID__)
-		#if INTPTR_MAX == INT64_MAX
-			#define RIVE_FMT_U64 "%lu"
-			#define RIVE_FMT_I64 "%ld"
-		#else 
-			#define RIVE_FMT_U64 "%llu"
-			#define RIVE_FMT_I64 "%lld"
-		#endif
-	#else
-		#include <inttypes.h>
-		#define RIVE_FMT_U64 "%" PRIu64
-		#define RIVE_FMT_I64 "%" PRId64
-	#endif
+#if defined(__ANDROID__)
+#if INTPTR_MAX == INT64_MAX
+#define RIVE_FMT_U64 "%lu"
+#define RIVE_FMT_I64 "%ld"
+#else
+#define RIVE_FMT_U64 "%llu"
+#define RIVE_FMT_I64 "%lld"
+#endif
+#elif defined(_WIN32)
+#define RIVE_FMT_U64 "%lld"
+#define RIVE_FMT_I64 "%llu"
+#else
+#include <inttypes.h>
+#define RIVE_FMT_U64 "%" PRIu64
+#define RIVE_FMT_I64 "%" PRId64
+#endif
 #endif
 
 // Import a single Rive runtime object.
@@ -76,10 +81,10 @@ static Core* readRuntimeObject(BinaryReader& reader,
 			if (id == -1)
 			{
 				// Still couldn't find it, give up.
-				fprintf(
-				    stderr,
-				    "Unknown property key " RIVE_FMT_U64 ", missing from property ToC.\n",
-				    propertyKey);
+				fprintf(stderr,
+				        "Unknown property key " RIVE_FMT_U64
+				        ", missing from property ToC.\n",
+				        propertyKey);
 				delete object;
 				return nullptr;
 			}
@@ -104,13 +109,15 @@ static Core* readRuntimeObject(BinaryReader& reader,
 	if (object == nullptr)
 	{
 		// fprintf(stderr,
-		//         "File contains an unknown object with coreType " RIVE_FMT_U64 ", which "
-		//         "this runtime doesn't understand.\n",
+		//         "File contains an unknown object with coreType " RIVE_FMT_U64
+		//         ", which " "this runtime doesn't understand.\n",
 		//         coreObjectKey);
 		return nullptr;
 	}
 	return object;
 }
+
+File::File(FileAssetResolver* assetResolver) : m_AssetResolver(assetResolver) {}
 
 File::~File()
 {
@@ -122,7 +129,9 @@ File::~File()
 }
 
 // Import a Rive file from a file handle
-ImportResult File::import(BinaryReader& reader, File** importedFile)
+ImportResult File::import(BinaryReader& reader,
+                          File** importedFile,
+                          FileAssetResolver* assetResolver)
 {
 	RuntimeHeader header;
 	if (!RuntimeHeader::read(reader, header))
@@ -140,7 +149,7 @@ ImportResult File::import(BinaryReader& reader, File** importedFile)
 		        minorVersion);
 		return ImportResult::unsupportedVersion;
 	}
-	auto file = new File();
+	auto file = new File(assetResolver);
 	auto result = file->read(reader, header);
 	if (result != ImportResult::success)
 	{
@@ -187,6 +196,9 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 
 		switch (stackType)
 		{
+			case Backboard::typeKey:
+				stackObject = new BackboardImporter(object->as<Backboard>());
+				break;
 			case Artboard::typeKey:
 				stackObject = new ArtboardImporter(object->as<Artboard>());
 				break;
@@ -243,6 +255,11 @@ ImportResult File::read(BinaryReader& reader, const RuntimeHeader& header)
 				stackObject =
 				    new StateTransitionImporter(object->as<StateTransition>());
 				stackType = StateTransition::typeKey;
+				break;
+			case ImageAsset::typeKey:
+				stackObject = new FileAssetImporter(object->as<FileAsset>(),
+				                                    m_AssetResolver);
+				stackType = FileAsset::typeKey;
 				break;
 		}
 		if (importStack.makeLatest(stackType, stackObject) != StatusCode::Ok)

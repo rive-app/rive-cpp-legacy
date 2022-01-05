@@ -64,6 +64,9 @@ skia/dependencies/glfw_build
 skia/dependencies/FFmpeg
 skia/dependencies/x264
 skia/renderer/build/bin
+skia/renderer/build/obj
+skia/renderer/build/macosx
+skia/renderer/build/android
 skia/**/build/bin
 /skia/dependencies/glfw
 /skia/dependencies/gl3w
@@ -71,6 +74,9 @@ skia/**/build/bin
 /skia/dependencies/libzip
 /skia/dependencies/libzip_build
 /skia/viewer/imgui.ini
-/diligent/viewer/build/bin/debug/rive_diligent_viewer
 /build/obj
 /renderer/viewer/build/bin/debug/rive_low_level_viewer
+/skia/viewer/build/macosx
+/skia/thumbnail_generator/build/macosx
+/build/macosx
+/build/android
