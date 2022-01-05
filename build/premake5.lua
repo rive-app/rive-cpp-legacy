@@ -51,7 +51,7 @@ project "rive"
         defines {"DEBUG"}
         symbols "On"
 
-    configuration "with-low-level-rendering"
+    filter "options:with-low-level-rendering"
         defines("LOW_LEVEL_RENDERING")
         defines("CONTOUR_RECURSIVE")
 

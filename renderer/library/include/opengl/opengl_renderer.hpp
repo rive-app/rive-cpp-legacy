@@ -8,6 +8,15 @@
 
 namespace rive
 {
+	class OpenGLRenderImage : public RenderImage
+	{
+	public:
+		bool decode(const uint8_t* bytes, std::size_t size) override
+		{
+			return true;
+		}
+	};
+
 	class OpenGLRenderer : public LowLevelRenderer
 	{
 	private:
@@ -38,12 +47,15 @@ namespace rive
 		OpenGLRenderer();
 		~OpenGLRenderer();
 		void drawPath(RenderPath* path, RenderPaint* paint) override;
+		void
+		drawImage(RenderImage* image, BlendMode value, float opacity) override;
 
 		void startFrame() override;
 		void endFrame() override;
 
 		RenderPaint* makeRenderPaint() override;
 		RenderPath* makeRenderPath() override;
+		RenderImage* makeRenderImage() override;
 
 		bool initialize(void* data) override;
 

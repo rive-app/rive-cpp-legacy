@@ -14,6 +14,15 @@
 
 namespace rive
 {
+	class MetalRenderImage : public RenderImage
+	{
+	public:
+		bool decode(const uint8_t* bytes, std::size_t size) override
+		{
+			return true;
+		}
+	};
+
 	class MetalRenderer : public LowLevelRenderer
 	{
 	public:
@@ -24,12 +33,15 @@ namespace rive
 		void transform(const Mat2D& transform) override;
 		void drawPath(RenderPath* path, RenderPaint* paint) override;
 		void clipPath(RenderPath* path) override;
+		void
+		drawImage(RenderImage* image, BlendMode value, float opacity) override;
 
 		void startFrame() override;
 		void endFrame() override;
 
 		RenderPaint* makeRenderPaint() override;
 		RenderPath* makeRenderPath() override;
+		RenderImage* makeRenderImage() override;
 		bool initialize(void* data) override;
 
 		virtual id<MTLDevice> acquireDevice() = 0;

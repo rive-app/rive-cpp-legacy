@@ -8,6 +8,11 @@ void MetalRenderer::save() {}
 void MetalRenderer::restore() {}
 void MetalRenderer::transform(const Mat2D& transform) {}
 void MetalRenderer::drawPath(RenderPath* path, RenderPaint* paint) {}
+void MetalRenderer::drawImage(RenderImage* image,
+                              BlendMode value,
+                              float opacity)
+{
+}
 void MetalRenderer::clipPath(RenderPath* path) {}
 
 void MetalRenderer::startFrame() {}
@@ -15,6 +20,7 @@ void MetalRenderer::endFrame() {}
 
 RenderPaint* MetalRenderer::makeRenderPaint() { return new MetalRenderPaint(); }
 RenderPath* MetalRenderer::makeRenderPath() { return new MetalRenderPath(); }
+RenderImage* MetalRenderer::makeRenderImage() { return new MetalRenderImage(); }
 
 static const char kShaderSource[] =
     "#include <metal_stdlib>\n"
