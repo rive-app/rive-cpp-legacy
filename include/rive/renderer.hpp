@@ -5,6 +5,7 @@
 #include "rive/layout.hpp"
 #include "rive/math/aabb.hpp"
 #include "rive/math/mat2d.hpp"
+#include "rive/refcnt.hpp"
 #include "rive/shapes/paint/blend_mode.hpp"
 #include "rive/shapes/paint/stroke_cap.hpp"
 #include "rive/shapes/paint/stroke_join.hpp"
@@ -16,27 +17,66 @@ namespace rive
 {
 	class Vec2D;
 
+    using ColorInt = uint32_t;
+
 	enum class RenderPaintStyle
 	{
 		stroke,
 		fill
 	};
 
+    enum class RenderTileMode {
+        clamp,
+        repeat,
+        mirror,
+        decal,  // fill outside the domain with transparent
+    };
+
+    /*
+     *  Base class for Render objects that specify the src colors.
+     *
+     *  Shaders are immutable, and sharable between multiple paints, etc.
+     *
+     *  It is common that a shader may be created with a 'localMatrix'. If this is
+     *  not null, then it is applied to the shader's domain before the Renderer's CTM.
+     */
+    class RenderShader : public RefCnt {};
+
+    extern rcp<RenderShader> makeLinearGradient(float sx, float sy,
+                                                float ex, float ey,
+                                                const ColorInt colors[],    // [count]
+                                                const float stops[],        // [count]
+                                                int count,
+                                                RenderTileMode,
+                                                const Mat2D* localMatrix = nullptr);
+
+    extern rcp<RenderShader> makeRadialGradient(float cx, float cy, float radius,
+                                                const ColorInt colors[],    // [count]
+                                                const float stops[],        // [count]
+                                                int count,
+                                                RenderTileMode,
+                                                const Mat2D* localMatrix = nullptr);
+
+    extern rcp<RenderShader> makeSweepGradient(float cx, float cy,
+                                               const ColorInt colors[],    // [count]
+                                               const float stops[],        // [count]
+                                               int count,
+                                               const Mat2D* localMatrix = nullptr);
+
 	class RenderPaint
 	{
 	public:
 		virtual void style(RenderPaintStyle style) = 0;
-		virtual void color(unsigned int value) = 0;
+        // This is used only if the 'shader' is null.
+		virtual void color(ColorInt value) = 0;
 		virtual void thickness(float value) = 0;
 		virtual void join(StrokeJoin value) = 0;
 		virtual void cap(StrokeCap value) = 0;
 		virtual void blendMode(BlendMode value) = 0;
+        // If shader is not null, then ignore the 'color'
+        virtual void shader(rcp<RenderShader>) = 0;
 
-		virtual void linearGradient(float sx, float sy, float ex, float ey) = 0;
-		virtual void radialGradient(float sx, float sy, float ex, float ey) = 0;
-		virtual void addStop(unsigned int color, float stop) = 0;
-		virtual void completeGradient() = 0;
-		virtual ~RenderPaint() {}
+        virtual ~RenderPaint() {}
 	};
 
 	class RenderImage
