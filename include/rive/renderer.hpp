@@ -3,6 +3,7 @@
 
 #include "rive/command_path.hpp"
 #include "rive/layout.hpp"
+#include "rive/refcnt.hpp"
 #include "rive/math/aabb.hpp"
 #include "rive/math/mat2d.hpp"
 #include "rive/shapes/paint/blend_mode.hpp"
@@ -52,18 +53,29 @@ namespace rive
 		int height() const { return m_Height; }
 	};
 
-	class RenderPath : public CommandPath
-	{
-	public:
-		RenderPath* renderPath() override { return this; }
-		void addPath(CommandPath* path, const Mat2D& transform) override
-		{
-			addRenderPath(path->renderPath(), transform);
-		}
+    class RenderPath : public RefCnt {};
 
-		virtual void addRenderPath(RenderPath* path,
-		                           const Mat2D& transform) = 0;
-	};
+    enum class FillRule {
+        nonZero,
+        evenOdd
+    };
+
+    enum class PathVerb {
+        move,
+        line,
+        quad,
+        cubic,
+        close,
+    };
+
+    /*  Returns an immutable RenderPath.
+     *
+     *  ptCount is the logical number of points. Since "pts" is passed as
+     *  an array of floats, there will be 2*ptCount number of floats in the array.
+     */
+    extern rcp<RenderPath> makeRenderPath(const float pts[], int ptCount,
+                                          const uint8_t verbs[], int verbCount,
+                                          FillRule);
 
 	class Renderer
 	{
@@ -72,8 +84,8 @@ namespace rive
 		virtual void save() = 0;
 		virtual void restore() = 0;
 		virtual void transform(const Mat2D& transform) = 0;
-		virtual void drawPath(RenderPath* path, RenderPaint* paint) = 0;
-		virtual void clipPath(RenderPath* path) = 0;
+		virtual void drawPath(rcp<RenderPath> path, RenderPaint* paint) = 0;
+		virtual void clipPath(rcp<RenderPath> path) = 0;
 		virtual void
 		drawImage(RenderImage* image, BlendMode value, float opacity) = 0;
 
@@ -168,7 +180,6 @@ namespace rive
 		}
 	};
 
-	extern RenderPath* makeRenderPath();
 	extern RenderPaint* makeRenderPaint();
 	extern RenderImage* makeRenderImage();
 } // namespace rive
