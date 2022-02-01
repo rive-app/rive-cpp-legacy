@@ -39,18 +39,19 @@ namespace rive
 		virtual ~RenderPaint() {}
 	};
 
-	class RenderImage
-	{
-	protected:
-		int m_Width = 0;
-		int m_Height = 0;
+    class RenderImage : public RefCnt {
+        const int m_Width, m_Height;
+    public:
+        RenderImage(int width, int height) : m_Width(width), m_Height(height) {}
 
-	public:
-		virtual ~RenderImage() {}
-		virtual bool decode(const uint8_t* bytes, std::size_t size) = 0;
-		int width() const { return m_Width; }
-		int height() const { return m_Height; }
-	};
+        int width() const { return m_Width; }
+        int height() const { return m_Height; }
+        
+        virtual rcp<RenderImage> makeSubset(int left, int top, int right, int bottom) = 0;
+        virtual rcp<RenderImage> makeResized(int newWidth, int newHeight) = 0;
+    };
+
+    extern rcp<RenderImage> makeImageFromEncoded(const void*, size_t);
 
 	class RenderPath : public CommandPath
 	{
@@ -75,7 +76,7 @@ namespace rive
 		virtual void drawPath(RenderPath* path, RenderPaint* paint) = 0;
 		virtual void clipPath(RenderPath* path) = 0;
 		virtual void
-		drawImage(RenderImage* image, BlendMode value, float opacity) = 0;
+		drawImage(const RenderImage* image, BlendMode value, float opacity) = 0;
 
 		void computeAlignment(Mat2D& result,
 		                      Fit fit,
