@@ -19,12 +19,6 @@ namespace rive
 
     using ColorInt = uint32_t;
 
-	enum class RenderPaintStyle
-	{
-		stroke,
-		fill
-	};
-
     enum class RenderTileMode {
         clamp,
         repeat,
@@ -63,21 +57,19 @@ namespace rive
                                                int count,
                                                const Mat2D* localMatrix = nullptr);
 
-	class RenderPaint
-	{
-	public:
-		virtual void style(RenderPaintStyle style) = 0;
-        // This is used only if the 'shader' is null.
-		virtual void color(ColorInt value) = 0;
-		virtual void thickness(float value) = 0;
-		virtual void join(StrokeJoin value) = 0;
-		virtual void cap(StrokeCap value) = 0;
-		virtual void blendMode(BlendMode value) = 0;
-        // If shader is not null, then ignore the 'color'
-        virtual void shader(rcp<RenderShader>) = 0;
+    class RenderStroke {
+    public:
+        float       thickness;
+        StrokeJoin  join;
+        StrokeCap   cap;
+    };
 
-        virtual ~RenderPaint() {}
-	};
+    class RenderPaint {
+    public:
+        rcp<RenderShader>   shader;
+        ColorInt            color;
+        BlendMode           blendMode;
+    };
 
 	class RenderImage
 	{
