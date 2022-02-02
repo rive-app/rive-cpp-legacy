@@ -90,27 +90,34 @@ void LinearGradient::update(ComponentDirt value)
 
 			Vec2D worldEnd;
 			Vec2D::transform(worldEnd, end, world);
-			makeGradient(worldStart, worldEnd);
+            start = worldStart;
+            end = worldEnd;
 		}
-		else
-		{
-			makeGradient(start, end);
-		}
-		// build up the color and positions lists
-		double ro = opacity() * renderOpacity();
-		for (auto stop : m_Stops)
-		{
-			paint->addStop(
-			    colorModulateOpacity((unsigned int)stop->colorValue(), ro),
-			    stop->position());
-		}
-		paint->completeGradient();
+
+        const size_t count = m_Stops.size();
+        std::vector<ColorInt> colors;
+        std::vector<float> stops;
+        colors.resize(count);
+        stops.resize(count);
+
+        const double ro = opacity() * renderOpacity();
+        for (size_t i = 0; i < count; ++i) {
+            colors[i] = colorModulateOpacity((unsigned int)m_Stops[i]->colorValue(), ro);
+            stops[i]  = m_Stops[i]->position();
+        }
+        this->makeGradient(start, end, colors.data(), stops.data(), count);
 	}
 }
 
-void LinearGradient::makeGradient(const Vec2D& start, const Vec2D& end)
+void LinearGradient::makeGradient(const Vec2D& start, const Vec2D& end,
+								const ColorInt colors[], const float stops[], size_t count)
 {
-	renderPaint()->linearGradient(start[0], start[1], end[0], end[1]);
+	assert(count == m_Stops.size());
+	RenderTileMode tileMode = RenderTileMode::clamp;	// todo
+	const Mat2D* localMatrix = nullptr;					// todo
+	renderPaint()->shader = makeLinearGradient(start[0], start[1], end[0], end[1],
+										    colors, stops, count,
+								   					tileMode, localMatrix);
 }
 
 void LinearGradient::markGradientDirty() { addDirt(ComponentDirt::Paint); }

@@ -28,5 +28,5 @@ RenderPaint* ShapePaint::initRenderPaint(ShapePaintMutator* mutator)
 void ShapePaint::blendMode(BlendMode value)
 {
 	assert(m_RenderPaint != nullptr);
-	m_RenderPaint->blendMode(value);
+	m_RenderPaint->blendMode = value;
 }

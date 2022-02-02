@@ -26,8 +26,8 @@ void SolidColor::renderOpacityChanged()
 	{
 		return;
 	}
-	renderPaint()->color(
-	    colorModulateOpacity((unsigned int)colorValue(), renderOpacity()));
+	renderPaint()->color =
+	    colorModulateOpacity((unsigned int)colorValue(), renderOpacity());
 }
 
 void SolidColor::colorValueChanged() { renderOpacityChanged(); }

@@ -57,18 +57,22 @@ namespace rive
                                                int count,
                                                const Mat2D* localMatrix = nullptr);
 
-    class RenderStroke {
-    public:
-        float       thickness;
-        StrokeJoin  join;
-        StrokeCap   cap;
-    };
+      enum class RenderPaintStyle
+      {
+      		stroke,
+       		fill
+      };
 
     class RenderPaint {
     public:
         rcp<RenderShader>   shader;
         ColorInt            color;
         BlendMode           blendMode;
+
+        float               thickness;
+        StrokeJoin          join;
+        StrokeCap           cap;
+        RenderPaintStyle    style;
     };
 
 	class RenderImage

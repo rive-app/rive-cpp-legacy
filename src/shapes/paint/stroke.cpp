@@ -13,10 +13,10 @@ PathSpace Stroke::pathSpace() const
 RenderPaint* Stroke::initRenderPaint(ShapePaintMutator* mutator)
 {
 	auto renderPaint = Super::initRenderPaint(mutator);
-	renderPaint->style(RenderPaintStyle::stroke);
-	renderPaint->thickness(thickness());
-	renderPaint->cap((StrokeCap)cap());
-	renderPaint->join((StrokeJoin)join());
+	renderPaint->style = RenderPaintStyle::stroke;
+	renderPaint->thickness = thickness();
+	renderPaint->cap = (StrokeCap)cap();
+	renderPaint->join = (StrokeJoin)join();
 	return renderPaint;
 }
 
@@ -44,19 +44,19 @@ void Stroke::draw(Renderer* renderer, CommandPath* path)
 void Stroke::thicknessChanged()
 {
 	assert(m_RenderPaint != nullptr);
-	m_RenderPaint->thickness(thickness());
+	m_RenderPaint->thickness = thickness();
 }
 
 void Stroke::capChanged()
 {
 	assert(m_RenderPaint != nullptr);
-	m_RenderPaint->cap((StrokeCap)cap());
+	m_RenderPaint->cap = (StrokeCap)cap();
 }
 
 void Stroke::joinChanged()
 {
 	assert(m_RenderPaint != nullptr);
-	m_RenderPaint->join((StrokeJoin)join());
+	m_RenderPaint->join = (StrokeJoin)join();
 }
 
 void Stroke::addStrokeEffect(StrokeEffect* effect) { m_Effect = effect; }

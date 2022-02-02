@@ -7,7 +7,7 @@ PathSpace Fill::pathSpace() const { return PathSpace::Local; }
 RenderPaint* Fill::initRenderPaint(ShapePaintMutator* mutator)
 {
 	auto renderPaint = Super::initRenderPaint(mutator);
-	renderPaint->style(RenderPaintStyle::fill);
+	renderPaint->style = RenderPaintStyle::fill;
 	return renderPaint;
 }
 
