@@ -13,6 +13,7 @@
 
 // Make sure gl3w is included before glfw3
 // #include "GL/gl3w.h"
+#include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
@@ -78,8 +79,15 @@ int main(int argc, const char** argv)
 		return -1;
 	}
 
-#ifdef __APPLE__
 	glfwMakeContextCurrent(window);
+
+	if (glewInit() != GLEW_OK)
+	{
+		fprintf(stderr, "Failed to initialize glew.\n");
+		return -1;
+	}
+
+#ifdef __APPLE__
 	viewerNativeWindowHandle = static_cast<void*>(glfwGetCocoaWindow(window));
 #endif
 
@@ -119,16 +127,21 @@ int main(int argc, const char** argv)
 	// std::string filename = "assets/leg_issues.riv";
 	// std::string filename = "assets/control.riv";
 	// std::string filename = "assets/stroke_caps.riv";
-	FILE* fp = fopen(filename.c_str(), "r");
+	FILE* fp = fopen(filename.c_str(), "rb");
 	fseek(fp, 0, SEEK_END);
 	fileBytesLength = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	delete[] fileBytes;
 	fileBytes = new uint8_t[fileBytesLength];
-	if (fread(fileBytes, 1, fileBytesLength, fp) != fileBytesLength)
+	unsigned bytesRead = fread(fileBytes, 1, fileBytesLength, fp);
+	if (bytesRead != fileBytesLength)
 	{
 		delete[] fileBytes;
-		fprintf(stderr, "failed to read all of %s\n", filename.c_str());
+		fprintf(stderr,
+		        "failed to read all of %s (read %u of %u bytes)\n",
+		        filename.c_str(),
+		        bytesRead,
+		        fileBytesLength);
 		return 1;
 	}
 	auto reader = rive::BinaryReader(fileBytes, fileBytesLength);
@@ -197,9 +210,7 @@ int main(int argc, const char** argv)
 
 		renderer->endFrame();
 
-#if __APPLE__
 		glfwSwapBuffers(window);
-#endif
 		glfwPollEvents();
 	}
 
