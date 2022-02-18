@@ -13,7 +13,6 @@
 
 // Make sure gl3w is included before glfw3
 // #include "GL/gl3w.h"
-#include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
@@ -80,12 +79,6 @@ int main(int argc, const char** argv)
 	}
 
 	glfwMakeContextCurrent(window);
-
-	if (glewInit() != GLEW_OK)
-	{
-		fprintf(stderr, "Failed to initialize glew.\n");
-		return -1;
-	}
 
 #ifdef __APPLE__
 	viewerNativeWindowHandle = static_cast<void*>(glfwGetCocoaWindow(window));

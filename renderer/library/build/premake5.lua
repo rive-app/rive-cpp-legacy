@@ -15,6 +15,9 @@ if os.host() == "macosx" then
     defines {"GL_SILENCE_DEPRECATION"}
     includedirs {"../../dependencies/DiligentEngine_build/build/include"}
     files {"../src/**.mm"}
+elseif os.host() == "windows" then
+    includedirs {"%{DEPENDENCIES_DIR}/glew/include"}
+    links {"rive"}
 else
     links {"rive"}
 end

@@ -26,6 +26,11 @@ if os.host() == "macosx" then
     defines {"GL_SILENCE_DEPRECATION"}
     includedirs {"%{DEPENDENCIES_DIR}/include/gl3w"}
     files {"../src/**.mm"}
+elseif os.host() == "windows" then
+    links {"glfw3.lib", "glew32.lib", "opengl32.lib"}
+    includedirs {"%{DEPENDENCIES_DIR}/glfw/include", "%{DEPENDENCIES_DIR}/glew/include"}
+    libdirs {"%{DEPENDENCIES_DIR}/glfw/lib-vc2022", "%{DEPENDENCIES_DIR}/glew/lib/release/x64"}
+    defines {"RIVE_HAS_OPENGL"}
 end
 
 links {"rive", "rive_renderer"}

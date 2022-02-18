@@ -11,7 +11,11 @@ project "rive"
 
     files {"../src/**.cpp"}
 
-    buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti", "-Werror=format"}
+    buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
+
+    if os.host() ~= "windows" then
+        buildoptions {"-Werror=format"}
+    end
 
     filter {"system:macosx" }
         buildoptions {"-flto=full"}
