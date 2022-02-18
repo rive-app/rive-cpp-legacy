@@ -1,7 +1,7 @@
 ---
 BasedOnStyle: LLVM
 IndentWidth: 4
-UseTab: ForIndentation
+UseTab: Never
 TabWidth: 4
 BreakBeforeBraces: Allman
 IndentCaseLabels: true
@@ -18,14 +18,15 @@ BinPackParameters: false
 AlignAfterOpenBracket: Align
 SortIncludes: false
 BraceWrapping:
-  AfterEnum: true
-  AfterClass: true
-  AfterControlStatement: true
-  AfterNamespace: true
-  AfterFunction: true
-  AfterStruct: true
-  SplitEmptyFunction: true
+  AfterEnum: false
+  AfterClass: false
+  AfterControlStatement: MultiLine
+  AfterNamespace: false
+  AfterFunction: false
+  AfterStruct: false
+  SplitEmptyFunction: false
   AfterObjCDeclaration: true
+<<<<<<< HEAD
   AfterUnion: true
   AfterExternBlock: true
   BeforeCatch: true
@@ -35,3 +36,10 @@ BraceWrapping:
 Language: Cpp
 ---
 Language: ObjC
+=======
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  AfterCaseLabel: false
+>>>>>>> 98e8b36fbc41fd4abca9bfd41c0a72cc53c06363

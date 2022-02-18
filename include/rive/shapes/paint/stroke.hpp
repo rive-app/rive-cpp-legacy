@@ -4,11 +4,11 @@
 #include "rive/shapes/path_space.hpp"
 namespace rive
 {
-	class StrokeEffect;
-	class Stroke : public StrokeBase
-	{
-	private:
-		StrokeEffect* m_Effect = nullptr;
+    class StrokeEffect;
+    class Stroke : public StrokeBase
+    {
+    private:
+        StrokeEffect* m_Effect = nullptr;
 
 	public:
 		RenderPaint* initRenderPaint(ShapePaintMutator* mutator) override;
@@ -18,13 +18,14 @@ namespace rive
 		bool hasStrokeEffect() { return m_Effect != nullptr; }
 		void invalidate();
 		void invalidateRendering();
+        void invalidateEffects();
 		bool isVisible() const override;
 
-	protected:
-		void thicknessChanged() override;
-		void capChanged() override;
-		void joinChanged() override;
-	};
+    protected:
+        void thicknessChanged() override;
+        void capChanged() override;
+        void joinChanged() override;
+    };
 } // namespace rive
 
 #endif

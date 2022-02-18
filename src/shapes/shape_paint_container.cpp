@@ -10,31 +10,31 @@
 using namespace rive;
 ShapePaintContainer* ShapePaintContainer::from(Component* component)
 {
-	switch (component->coreType())
-	{
-		case Artboard::typeKey:
-			return component->as<Artboard>();
-			break;
-		case Shape::typeKey:
-			return component->as<Shape>();
-			break;
-	}
-	return nullptr;
+    switch (component->coreType())
+    {
+        case Artboard::typeKey:
+            return component->as<Artboard>();
+            break;
+        case Shape::typeKey:
+            return component->as<Shape>();
+            break;
+    }
+    return nullptr;
 }
 
 void ShapePaintContainer::addPaint(ShapePaint* paint)
 {
-	m_ShapePaints.push_back(paint);
+    m_ShapePaints.push_back(paint);
 }
 
 PathSpace ShapePaintContainer::pathSpace() const
 {
-	PathSpace space = m_DefaultPathSpace;
-	for (auto paint : m_ShapePaints)
-	{
-		space |= paint->pathSpace();
-	}
-	return space;
+    PathSpace space = m_DefaultPathSpace;
+    for (auto paint : m_ShapePaints)
+    {
+        space |= paint->pathSpace();
+    }
+    return space;
 }
 
 void ShapePaintContainer::invalidateStroke()
@@ -44,47 +44,48 @@ void ShapePaintContainer::invalidateStroke()
 		if (paint->is<Stroke>())
 		{
 			paint->as<Stroke>()->invalidate();
+            paint->as<Stroke>()->invalidateEffects();
 		}
 	}
 }
 
 CommandPath* ShapePaintContainer::makeCommandPath(PathSpace space)
 {
-	// Force a render path if we specifically request to use it for clipping or
-	// this shape is used for clipping.
-	bool needForRender = ((space | m_DefaultPathSpace) & PathSpace::Clipping) ==
-	                     PathSpace::Clipping;
+    // Force a render path if we specifically request to use it for clipping or
+    // this shape is used for clipping.
+    bool needForRender = ((space | m_DefaultPathSpace) & PathSpace::Clipping) ==
+                         PathSpace::Clipping;
 
-	bool needForEffects = false;
+    bool needForEffects = false;
 
-	for (auto paint : m_ShapePaints)
-	{
-		if (space != PathSpace::Neither &&
-		    (space & paint->pathSpace()) != space)
-		{
-			continue;
-		}
+    for (auto paint : m_ShapePaints)
+    {
+        if (space != PathSpace::Neither &&
+            (space & paint->pathSpace()) != space)
+        {
+            continue;
+        }
 
-		if (paint->is<Stroke>() && paint->as<Stroke>()->hasStrokeEffect())
-		{
-			needForEffects = true;
-		}
-		else
-		{
-			needForRender = true;
-		}
-	}
+        if (paint->is<Stroke>() && paint->as<Stroke>()->hasStrokeEffect())
+        {
+            needForEffects = true;
+        }
+        else
+        {
+            needForRender = true;
+        }
+    }
 
-	if (needForEffects && needForRender)
-	{
-		return new RenderMetricsPath();
-	}
-	else if (needForEffects)
-	{
-		return new OnlyMetricsPath();
-	}
-	else
-	{
-		return rive::makeRenderPath();
-	}
+    if (needForEffects && needForRender)
+    {
+        return new RenderMetricsPath();
+    }
+    else if (needForEffects)
+    {
+        return new OnlyMetricsPath();
+    }
+    else
+    {
+        return rive::makeRenderPath();
+    }
 }

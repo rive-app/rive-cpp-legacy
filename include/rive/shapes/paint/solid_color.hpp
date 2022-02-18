@@ -4,15 +4,16 @@
 #include "rive/shapes/paint/shape_paint_mutator.hpp"
 namespace rive
 {
-	class SolidColor : public SolidColorBase, public ShapePaintMutator
-	{
-	public:
-		StatusCode onAddedDirty(CoreContext* context) override;
+    class SolidColor : public SolidColorBase, public ShapePaintMutator
+    {
+    public:
+        StatusCode onAddedDirty(CoreContext* context) override;
 
-	protected:
-		void renderOpacityChanged() override;
-		void colorValueChanged() override;
-	};
+    protected:
+        void renderOpacityChanged() override;
+        void colorValueChanged() override;
+        bool internalIsTranslucent() const override;
+    };
 } // namespace rive
 
 #endif
