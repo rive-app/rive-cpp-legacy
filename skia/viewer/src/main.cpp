@@ -28,6 +28,8 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
+#include "fonts.hpp"
+
 #include <cmath>
 #include <stdio.h>
 
@@ -132,7 +134,69 @@ void glfwDropCallback(GLFWwindow* window, int count, const char** paths) {
     initAnimation(0);
 }
 
+struct SkPathSink : public PathSink {
+    SkPath* m_Path;
+    SkPathSink(SkPath* path) : m_Path(path) {}
+
+    void move(float x, float y) override { m_Path->moveTo(x, y); }
+    void line(float x, float y) override { m_Path->lineTo(x, y); }
+    void quad(float x0, float y0, float x1, float y1) override {
+        m_Path->quadTo(x0, y0, x1, y1);
+    }
+    void cubic(float x0, float y0, float x1, float y1, float x2, float y2) override {
+        m_Path->cubicTo(x0, y0, x1, y1, x2, y2);
+    }
+    void close() override { m_Path->close(); }
+};
+
+struct Bouncer {
+    float value;
+    float min, max;
+    float delta;
+    
+    Bouncer(float v, float mn, float mx, float durationInSeconds)
+        : value(v)
+        , min(mn)
+        , max(mx)
+    {
+        assert(mn < mx);
+        assert(mn <= value && value <= mx);
+        delta = (mx - mn) / durationInSeconds;
+    }
+    
+    float curr() const { return value; }
+    float advance(float secs) {
+        float nv = value + secs * delta;
+        if (nv > max) {
+            nv = max;
+            assert(delta > 0);
+            delta = -delta;
+        } else if (nv < min) {
+            nv = min;
+            assert(delta < 0);
+            delta = -delta;
+        }
+        value = nv;
+        return value;
+    }
+};
+
 int main() {
+    FTLib lib;
+    
+    auto data = SkData::MakeFromFileName("/Users/mike/fonts/Skia.ttf");
+    assert(data);
+
+    FTFace face;
+    face.load(lib.m_Lib, data);
+    int glyph = FT_Get_Char_Index(face.m_Face, 'Q');
+    face.setSize(600);
+    const FTAxis* ax = face.axes();
+    Bouncer bouncers[2] = {
+        Bouncer(ax[0].m_Def, ax[0].m_Min, ax[0].m_Max, 4),
+        Bouncer(ax[1].m_Def, ax[1].m_Min, ax[1].m_Max, 3),
+    };
+
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize glfw.\n");
         return 1;
@@ -234,6 +298,27 @@ int main() {
         SkPaint paint;
         paint.setColor(SK_ColorDKGRAY);
         canvas->drawPaint(paint);
+
+        {
+            SkPaint paint;
+            paint.setColor(0xFFFFFFFF);
+            SkAutoCanvasRestore acr(canvas, true);
+            canvas->translate(300, 700);
+
+            FTCoord c[2];
+            for (int i = 0; i < 2; ++i) {
+                c[i] = {
+                    ax[i].m_Tag,
+                    bouncers[i].advance(elapsed),
+                };
+            }
+            face.setCoords(c, 2);
+
+            SkPath path;
+            SkPathSink sink(&path);
+            face.getPath(glyph, &sink);
+            canvas->drawPath(path, paint);
+        }
 
         if (artboard != nullptr) {
             if (animationInstance != nullptr) {
