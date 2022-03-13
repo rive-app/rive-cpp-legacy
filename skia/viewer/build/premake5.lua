@@ -19,17 +19,24 @@ includedirs {"../include", "../../../include", "../../renderer/include", "../../
              "../../dependencies/skia", "../../dependencies/skia/include/core",
              "../../dependencies/skia/include/effects", "../../dependencies/skia/include/gpu",
              "../../dependencies/skia/include/config", "../../dependencies/imgui", "../../dependencies",
-             "../../dependencies/gl3w/build/include"}
+             "../../dependencies/gl3w/build/include",
+             "/Users/mike/other/freetype/include"
+}
 
-links {"Cocoa.framework", "IOKit.framework", "CoreVideo.framework", "rive", "skia", "rive_skia_renderer", "glfw3"}
+links {
+    "Cocoa.framework", "IOKit.framework", "CoreVideo.framework",
+    "rive", "skia", "rive_skia_renderer", "glfw3",
+    "freetype",
+}
 libdirs {"../../../build/%{cfg.system}/bin/%{cfg.buildcfg}", "../../dependencies/glfw_build/src",
-         "../../dependencies/skia/out/static", "../../renderer/build/%{cfg.system}/bin/%{cfg.buildcfg}"}
+         "../../dependencies/skia/out/static", "../../renderer/build/%{cfg.system}/bin/%{cfg.buildcfg}",}
 
 files {"../src/**.cpp", "../../dependencies/gl3w/build/src/gl3w.c",
        "../../dependencies/imgui/backends/imgui_impl_glfw.cpp",
        "../../dependencies/imgui/backends/imgui_impl_opengl3.cpp", "../../dependencies/imgui/imgui_widgets.cpp",
        "../../dependencies/imgui/imgui.cpp", "../../dependencies/imgui/imgui_tables.cpp",
-       "../../dependencies/imgui/imgui_draw.cpp"}
+       "../../dependencies/imgui/imgui_draw.cpp",
+    }
 
 buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti", "-flto=full"}
 filter "configurations:debug"
@@ -40,7 +47,7 @@ filter "configurations:release"
 
 defines {"RELEASE"}
 defines {"NDEBUG"}
-optimize "On"
+symbols "On"
 
 -- Clean Function --
 newaction {
