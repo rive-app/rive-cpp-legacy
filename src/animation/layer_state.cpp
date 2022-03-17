@@ -48,6 +48,6 @@ void LayerState::addTransition(StateTransition* transition) {
     m_Transitions.push_back(transition);
 }
 
-StateInstance* LayerState::makeInstance() const {
-    return new SystemStateInstance(this);
+std::unique_ptr<StateInstance> LayerState::makeInstance() const {
+    return std::make_unique<SystemStateInstance>(this);
 }

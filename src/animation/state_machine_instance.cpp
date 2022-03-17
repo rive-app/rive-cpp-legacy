@@ -21,12 +21,10 @@ namespace rive {
         static const int maxIterations = 100;
         const StateMachineLayer* m_Layer = nullptr;
 
-        StateInstance* m_AnyStateInstance = nullptr;
-        StateInstance* m_CurrentState = nullptr;
-        StateInstance* m_StateFrom = nullptr;
+        std::unique_ptr<StateInstance> m_AnyStateInstance;
+        std::unique_ptr<StateInstance> m_CurrentState;
+        std::unique_ptr<StateInstance> m_StateFrom;
 
-        // const LayerState* m_CurrentState = nullptr;
-        // const LayerState* m_StateFrom = nullptr;
         const StateTransition* m_Transition = nullptr;
 
         bool m_HoldAnimationFrom = false;
@@ -42,12 +40,6 @@ namespace rive {
         float m_HoldTime = 0.0f;
 
     public:
-        ~StateMachineLayerInstance() {
-            delete m_AnyStateInstance;
-            delete m_CurrentState;
-            delete m_StateFrom;
-        }
-
         void init(const StateMachineLayer* layer) {
             assert(m_Layer == nullptr);
             m_AnyStateInstance = layer->anyState()->makeInstance();
@@ -117,11 +109,11 @@ namespace rive {
 
             m_WaitingForExit = false;
 
-            if (tryChangeState(m_AnyStateInstance, inputs, ignoreTriggers)) {
+            if (tryChangeState(m_AnyStateInstance.get(), inputs, ignoreTriggers)) {
                 return true;
             }
 
-            return tryChangeState(m_CurrentState, inputs, ignoreTriggers);
+            return tryChangeState(m_CurrentState.get(), inputs, ignoreTriggers);
         }
 
         bool changeState(const LayerState* stateTo) {
@@ -142,7 +134,7 @@ namespace rive {
                 return false;
             }
             auto stateFrom = stateFromInstance->state();
-            auto outState = m_CurrentState;
+            auto outState = m_CurrentState.get();
             for (size_t i = 0, length = stateFrom->transitionCount();
                  i < length;
                  i++) {
@@ -168,7 +160,7 @@ namespace rive {
                         // Make sure we apply this state. This only returns true
                         // when it's an animation state instance.
                         auto instance =
-                            static_cast<AnimationStateInstance*>(m_StateFrom)
+                            static_cast<AnimationStateInstance*>(m_StateFrom.get())
                                 ->animationInstance();
 
                         m_HoldAnimation = instance->animation();
@@ -185,7 +177,7 @@ namespace rive {
                         m_CurrentState != nullptr)
                     {
                         auto instance =
-                            static_cast<AnimationStateInstance*>(m_StateFrom)
+                            static_cast<AnimationStateInstance*>(m_StateFrom.get())
                                 ->animationInstance();
 
                         auto spilledTime = instance->spilledTime();
@@ -228,7 +220,7 @@ namespace rive {
                 !m_CurrentState->state()->is<AnimationState>()) {
                 return nullptr;
             }
-            return static_cast<AnimationStateInstance*>(m_CurrentState)
+            return static_cast<AnimationStateInstance*>(m_CurrentState.get())
                 ->animationInstance();
         }
     };
