@@ -22,6 +22,7 @@
 #include "rive/artboard.hpp"
 #include "rive/file.hpp"
 #include "rive/layout.hpp"
+#include "rive/nested_artboard.hpp"
 #include "rive/math/aabb.hpp"
 #include "skia_renderer.hpp"
 
@@ -32,6 +33,9 @@
 #include <stdio.h>
 
 std::string filename;
+const char* artboardName = "Bullet Man";
+const char* animationName;
+
 rive::File* currentFile = nullptr;
 rive::Artboard* artboard = nullptr;
 rive::StateMachineInstance* stateMachineInstance = nullptr;
@@ -54,7 +58,10 @@ void initStateMachine(int index) {
         fprintf(stderr, "failed to import file\n");
         return;
     }
-    auto sourceArtboard = file->artboard();
+    auto sourceArtboard = file->artboard(artboardName);
+    if (!sourceArtboard) {
+        sourceArtboard = file->artboard();
+    }
     // Artboard should always be instance and hence must be deleted.
     delete artboard;
     artboard = sourceArtboard->instance();
@@ -76,6 +83,41 @@ void initStateMachine(int index) {
     currentFile = file;
 }
 
+static void dump_inputs(rive::StateMachine* machine) {
+    std::unique_ptr<rive::StateMachineInstance> inst(new rive::StateMachineInstance(machine));
+
+    printf("state machine: %s needs advance %d\n",
+           machine->name().c_str(), inst->needsAdvance());
+
+    for (size_t i = 0; i < inst->inputCount(); ++i) {
+        rive::SMIInput* input = inst->input(i);
+        auto input_inst = input->input();
+        const char* name = input_inst->name().c_str();
+        if (input_inst->is<rive::StateMachineNumber>()) {
+            printf("   number: %s\n", name);
+        }
+        else if (input_inst->is<rive::StateMachineBool>()) {
+            printf("     bool: %s\n", name);
+        }
+        else if (input_inst->is<rive::StateMachineTrigger>()) {
+            printf("  trigger: %s\n", name);
+        }
+    }
+}
+
+static void dump_machines(rive::Artboard* artboard) {
+    for (size_t i = 0; i < artboard->stateMachineCount(); ++i) {
+        auto machine = artboard->stateMachine(i);
+        dump_inputs(machine);
+    }
+}
+
+static void fire(rive::StateMachineInstance* smi, const char trigger[]) {
+    auto tr = smi->getTrigger(trigger);
+    assert(tr);
+    tr->fire();
+}
+
 void initAnimation(int index) {
     animationIndex = index;
     stateMachineIndex = -1;
@@ -88,7 +130,12 @@ void initAnimation(int index) {
         fprintf(stderr, "failed to import file\n");
         return;
     }
-    auto sourceArtboard = file->artboard();
+    auto sourceArtboard = file->artboard(artboardName);
+    if (!sourceArtboard) {
+        sourceArtboard = file->artboard();
+    }
+    dump_machines(sourceArtboard);
+
     // Artboard should always be instance and hence must be deleted.
     delete artboard;
     artboard = sourceArtboard->instance();
@@ -108,6 +155,8 @@ void initAnimation(int index) {
     }
 
     currentFile = file;
+    
+    initStateMachine(0);
 }
 
 void glfwErrorCallback(int error, const char* description) {
@@ -116,6 +165,7 @@ void glfwErrorCallback(int error, const char* description) {
 
 void glfwDropCallback(GLFWwindow* window, int count, const char** paths) {
     // Just get the last dropped file for now...
+    printf("dropcallback %d %s\n", count, paths[count-1]);
     filename = paths[count - 1];
 
     FILE* fp = fopen(filename.c_str(), "r");
@@ -132,7 +182,90 @@ void glfwDropCallback(GLFWwindow* window, int count, const char** paths) {
     initAnimation(0);
 }
 
-int main() {
+static bool handle_click(rive::Artboard* artboard, const char name[]) {
+    const struct {
+        const char* click;
+        const char* machine;
+        const char* trigger;
+    } triggers[] = {
+        { "hand-wick",   "State Machine 1", "Light", },
+        { "hand-fire",   "State Machine 1", "Cannon", },
+        { "hand-helmet", "State Machine 1", "Helmet", },
+    };
+    
+    for (const auto& t : triggers) {
+        if (strcmp(name, t.click) == 0) {
+            printf("found\n");
+            fire(stateMachineInstance, t.trigger);
+            return true;
+        }
+    }
+    return false;
+}
+
+static void test_hittest(rive::Artboard* artboard, const SkMatrix& ctm) {
+    const auto mouse = ImGui::GetMousePos();
+
+    SkMatrix inv;
+    (void)ctm.invert(&inv);
+    auto pt = inv.mapXY(mouse.x * 2, mouse.y * 2);
+    
+    const auto bounds = artboard->bounds();
+    if (pt.x() < bounds.left() || pt.x() >= bounds.right() ||
+        pt.y() < bounds.top() || pt.y() >= bounds.bottom()) {
+        return;
+    }
+    
+    rive::HitInfo hinfo;
+    hinfo.area = rive::AABB(pt.fX - 1, pt.fY - 1, pt.fX + 2, pt.fY + 2).round();
+
+    static rive::Core* gPrev;
+
+    auto node = artboard->hitTest(&hinfo);
+    if (node != gPrev) {
+        gPrev = node;
+        const char* name = nullptr;
+        if (node) {
+            assert(node->is<rive::Component>());
+
+            name = node->as<rive::Component>()->name().c_str();
+            printf("(%s) mounts [ ", name);
+            for (auto na : hinfo.mounts) {
+                const char* naname = nullptr;
+                if (na) {
+                    naname = na->name().c_str();
+                }
+                printf("(%s) ", naname);
+            }
+            printf("]\n");
+            
+            if (hinfo.mounts.size() == 1) {
+                handle_click(artboard, hinfo.mounts[0]->name().c_str());
+            }
+        } else {
+            printf("no hit\n");
+        }
+    }
+}
+
+int main(int argc, const char* argv[]) {
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--file") == 0) {
+            filename = argv[++i];
+            printf("file %s\n", filename.c_str());
+            continue;
+        }
+        if (strcmp(argv[i], "--artboard") == 0) {
+            artboardName = argv[++i];
+            printf("artb %s\n", artboardName);
+            continue;
+        }
+        if (strcmp(argv[i], "--animation") == 0) {
+            animationName = argv[++i];
+            continue;
+        }
+    }
+
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize glfw.\n");
         return 1;
@@ -250,8 +383,12 @@ int main() {
                            rive::Alignment::center,
                            rive::AABB(0, 0, width, height),
                            artboard->bounds());
+            auto mx = canvas->getTotalMatrix();
+
             artboard->draw(&renderer);
             renderer.restore();
+            
+            test_hittest(artboard, mx);
         }
 
         context->flush();
