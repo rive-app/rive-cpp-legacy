@@ -13,6 +13,10 @@
 #include "rive/animation/animation_state.hpp"
 #include "rive/animation/state_instance.hpp"
 #include "rive/animation/animation_state_instance.hpp"
+#include "rive/animation/state_machine_event.hpp"
+#include "rive/shapes/shape.hpp"
+#include "rive/math/aabb.hpp"
+#include <unordered_map>
 
 using namespace rive;
 namespace rive {
@@ -211,9 +215,61 @@ namespace rive {
             return static_cast<AnimationStateInstance*>(m_CurrentState)->animationInstance();
         }
     };
+
+    /// Representation of a Shape from the Artboard Instance and all the events it
+    /// triggers. Allows tracking hover and performing hit detection only once on
+    /// shapes that trigger multiple events.
+    class HitShape {
+    private:
+        Shape* m_Shape;
+
+    public:
+        Shape* shape() const { return m_Shape; }
+        HitShape(Shape* shape) : m_Shape(shape) {}
+        bool isHovered = false;
+        std::vector<const StateMachineEvent*> events;
+    };
 } // namespace rive
 
-StateMachineInstance::StateMachineInstance(const StateMachine* machine) : m_Machine(machine) {
+void StateMachineInstance::processEvent(Vec2D position, EventType hitEvent) {
+    const int hitRadius = 2;
+    auto hitArea = AABB(position.x() - hitRadius,
+                        position.y() - hitRadius,
+                        position.x() + hitRadius,
+                        position.y() + hitRadius)
+                       .round();
+    for (auto hitShape : m_HitShapes) {
+
+        // TODO: quick reject.
+
+        // TODO: hit test
+        bool isOver = false;
+
+        bool hoverChange = hitShape->isHovered != isOver;
+        hitShape->isHovered = isOver;
+        // iterate all events associated with this hit shape
+        for (auto event : hitShape->events) {
+            // Always update hover states regardless of which specific event type
+            // we're trying to trigger.
+            if (hoverChange) {
+                if (isOver && event->eventType() == EventType::enter) {
+                    event->performChanges(this);
+                    markNeedsAdvance();
+                } else if (!isOver && event->eventType() == EventType::exit) {
+                    event->performChanges(this);
+                    markNeedsAdvance();
+                }
+            }
+            if (isOver && hitEvent == event->eventType()) {
+                event->performChanges(this);
+                markNeedsAdvance();
+            }
+        }
+    }
+}
+
+StateMachineInstance::StateMachineInstance(const StateMachine* machine, Artboard* artboard) :
+    m_Machine(machine), m_Artboard(artboard) {
     m_InputCount = machine->inputCount();
     m_InputInstances = new SMIInput*[m_InputCount];
     for (size_t i = 0; i < m_InputCount; i++) {
@@ -244,9 +300,40 @@ StateMachineInstance::StateMachineInstance(const StateMachine* machine) : m_Mach
     for (size_t i = 0; i < m_LayerCount; i++) {
         m_Layers[i].init(machine->layer(i));
     }
+
+    // Initialize events. Store a lookup table of shape id to hit shape
+    // representation (an object that stores all the events triggered by the
+    // shape producing an event).
+    std::unordered_map<uint32_t, HitShape*> hitShapeLookup;
+    for (std::size_t i = 0; i < machine->eventCount(); i++) {
+        auto event = machine->event(i);
+
+        // Iterate actual leaf hittable shapes tied to this event and resolve
+        // corresponding ones in the artboard instance.
+        for (auto id : event->hitShapeIds()) {
+            HitShape* hitShape;
+            auto itr = hitShapeLookup.find(id);
+            if (itr == hitShapeLookup.end()) {
+                auto shape = artboard->resolve(id);
+                if (shape != nullptr && shape->is<Shape>()) {
+                    hitShapeLookup[id] = hitShape = new HitShape(shape->as<Shape>());
+                    m_HitShapes.push_back(hitShape);
+                } else {
+                    // No object or not a shape...
+                    continue;
+                }
+            } else {
+                hitShape = itr->second;
+            }
+            hitShape->events.push_back(event);
+        }
+    }
 }
 
 StateMachineInstance::~StateMachineInstance() {
+    for (auto hitShape : m_HitShapes) {
+        delete hitShape;
+    }
     // TODO: can this and others be rewritten as for (auto inst : m_InputInstances) ?
     for (size_t i = 0; i < m_InputCount; i++) {
         delete m_InputInstances[i];
@@ -255,10 +342,10 @@ StateMachineInstance::~StateMachineInstance() {
     delete[] m_Layers;
 }
 
-bool StateMachineInstance::advance(Artboard* artboard, float seconds) {
+bool StateMachineInstance::advance(float seconds) {
     m_NeedsAdvance = false;
     for (size_t i = 0; i < m_LayerCount; i++) {
-        if (m_Layers[i].advance(artboard, seconds, m_InputInstances, m_InputCount)) {
+        if (m_Layers[i].advance(m_Artboard, seconds, m_InputInstances, m_InputCount)) {
             m_NeedsAdvance = true;
         }
     }

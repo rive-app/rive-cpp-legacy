@@ -13,6 +13,7 @@
 #include "rive/importers/import_stack.hpp"
 #include "rive/importers/backboard_importer.hpp"
 #include "rive/nested_artboard.hpp"
+#include "rive/animation/state_machine_instance.hpp"
 
 #include <stack>
 #include <unordered_map>
@@ -278,12 +279,14 @@ void Artboard::addNestedArtboard(NestedArtboard* artboard) {
     m_NestedArtboards.push_back(artboard);
 }
 
-Core* Artboard::resolve(int id) const {
+Core* Artboard::resolve(uint32_t id) const {
     if (id < 0 || id >= static_cast<int>(m_Objects.size())) {
         return nullptr;
     }
     return m_Objects[id];
 }
+
+uint32_t Artboard::idOf(Core* object) const { return 0; }
 
 void Artboard::onComponentDirty(Component* component) {
     m_Dirt |= ComponentDirt::Components;
@@ -488,6 +491,22 @@ StateMachine* Artboard::stateMachine(size_t index) const {
         return nullptr;
     }
     return m_StateMachines[index];
+}
+
+StateMachineInstance* Artboard::stateMachineInstance(std::string name) {
+    StateMachine* machine = stateMachine(name);
+    if (machine != nullptr) {
+        return new StateMachineInstance(machine, this);
+    }
+    return nullptr;
+}
+
+StateMachineInstance* Artboard::stateMachineInstance(size_t index) {
+    StateMachine* machine = stateMachine(index);
+    if (machine != nullptr) {
+        return new StateMachineInstance(machine, this);
+    }
+    return nullptr;
 }
 
 Artboard* Artboard::instance() const {

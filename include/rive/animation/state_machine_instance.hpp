@@ -3,7 +3,9 @@
 
 #include <string>
 #include <stddef.h>
+#include <vector>
 #include "rive/animation/linear_animation_instance.hpp"
+#include "rive/event_type.hpp"
 
 namespace rive {
     class StateMachine;
@@ -13,14 +15,18 @@ namespace rive {
     class SMIBool;
     class SMINumber;
     class SMITrigger;
-
+    class Shape;
     class StateMachineLayerInstance;
+    class HitShape;
 
     class StateMachineInstance {
         friend class SMIInput;
 
     private:
         const StateMachine* m_Machine;
+        /// The artboard the changes will be applied to.
+        Artboard* m_Artboard;
+
         bool m_NeedsAdvance = false;
 
         size_t m_InputCount;
@@ -30,13 +36,16 @@ namespace rive {
 
         void markNeedsAdvance();
 
+        std::vector<HitShape*> m_HitShapes;
+        void processEvent(Vec2D position, EventType hitEvent);
+
     public:
-        StateMachineInstance(const StateMachine* machine);
+        StateMachineInstance(const StateMachine* machine, Artboard* artboard);
         ~StateMachineInstance();
 
         // Advance the state machine by the specified time. Returns true if the
         // state machine will continue to animate after this advance.
-        bool advance(Artboard* artboard, float seconds);
+        bool advance(float seconds);
 
         // Returns true when the StateMachineInstance has more data to process.
         bool needsAdvance() const;

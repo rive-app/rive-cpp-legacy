@@ -22,6 +22,7 @@ namespace rive {
     class DrawTarget;
     class ArtboardImporter;
     class NestedArtboard;
+    class StateMachineInstance;
 
     class Artboard : public ArtboardBase, public CoreContext, public ShapePaintContainer {
         friend class File;
@@ -63,7 +64,8 @@ namespace rive {
         ~Artboard();
         StatusCode initialize();
 
-        Core* resolve(int id) const override;
+        Core* resolve(uint32_t id) const override;
+        uint32_t idOf(Core* object) const;
 
         // EXPERIMENTAL -- for internal testing only for now.
         // DO NOT RELY ON THIS as it may change/disappear in the future.
@@ -128,6 +130,15 @@ namespace rive {
         StateMachine* firstStateMachine() const;
         StateMachine* stateMachine(std::string name) const;
         StateMachine* stateMachine(size_t index) const;
+
+        /// Make an instance of a state machine given the name of the source state machine in this
+        /// artboard. The StateMachineInstance must be explictly deleted when no longer needed.
+        StateMachineInstance* stateMachineInstance(std::string name);
+
+        /// Make an instance of a state machine given the index of the source state machine in this
+        /// artboard. The StateMachineInstance must be explictly deleted when no longer needed.
+        StateMachineInstance* stateMachineInstance(size_t index);
+
         size_t stateMachineCount() const { return m_StateMachines.size(); }
 
         /// Make an instance of this artboard, must be explictly deleted when no
