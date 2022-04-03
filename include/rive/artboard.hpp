@@ -65,6 +65,9 @@ namespace rive {
         StatusCode initialize();
 
         Core* resolve(uint32_t id) const override;
+
+        /// Find the index of a component in the artboard the object in the artboard. The artboard
+        /// itself lives at index 0 so we use that as a flag for not found.
         uint32_t idOf(Core* object) const;
 
         // EXPERIMENTAL -- for internal testing only for now.
@@ -87,7 +90,7 @@ namespace rive {
 
         // Returns true iff calling popMessage() will return true.
         bool hasMessages() const;
-        
+
         // If there are any queued messages...
         //   copies the first message into msg parameter
         //   removes that message from the queue

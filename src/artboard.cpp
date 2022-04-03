@@ -286,7 +286,15 @@ Core* Artboard::resolve(uint32_t id) const {
     return m_Objects[id];
 }
 
-uint32_t Artboard::idOf(Core* object) const { return 0; }
+uint32_t Artboard::idOf(Core* object) const {
+    auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
+
+    if (it != m_Objects.end()) {
+        return it - m_Objects.begin();
+    } else {
+        return 0;
+    }
+}
 
 void Artboard::onComponentDirty(Component* component) {
     m_Dirt |= ComponentDirt::Components;
@@ -576,7 +584,8 @@ void Artboard::postPointerEvent(const PointerEvent& evt) {
                 assert(gButtonIsDown);
                 gButtonIsDown = false;
                 break;
-            default: break;
+            default:
+                break;
         }
 
 #if 0
@@ -602,13 +611,9 @@ void Artboard::postPointerEvent(const PointerEvent& evt) {
 #endif
 }
 
-void Artboard::testing_only_enque_message(const Message& msg) {
-    m_MessageQueue.push(msg);
-}
+void Artboard::testing_only_enque_message(const Message& msg) { m_MessageQueue.push(msg); }
 
-bool Artboard::hasMessages() const {
-    return !m_MessageQueue.empty();
-}
+bool Artboard::hasMessages() const { return !m_MessageQueue.empty(); }
 
 bool Artboard::nextMessage(Message* msg) {
     if (m_MessageQueue.empty()) {

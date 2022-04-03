@@ -16,6 +16,7 @@
 #include "rive/animation/state_machine_event.hpp"
 #include "rive/shapes/shape.hpp"
 #include "rive/math/aabb.hpp"
+#include "rive/math/hit_test.hpp"
 #include <unordered_map>
 
 using namespace rive;
@@ -238,15 +239,16 @@ void StateMachineInstance::processEvent(Vec2D position, EventType hitEvent) {
                         position.x() + hitRadius,
                         position.y() + hitRadius)
                        .round();
+
     for (auto hitShape : m_HitShapes) {
 
         // TODO: quick reject.
 
-        // TODO: hit test
-        bool isOver = false;
+        bool isOver = hitShape->shape()->hitTest(hitArea);
 
         bool hoverChange = hitShape->isHovered != isOver;
         hitShape->isHovered = isOver;
+
         // iterate all events associated with this hit shape
         for (auto event : hitShape->events) {
             // Always update hover states regardless of which specific event type
@@ -266,6 +268,16 @@ void StateMachineInstance::processEvent(Vec2D position, EventType hitEvent) {
             }
         }
     }
+}
+
+void StateMachineInstance::pointerMove(const Vec2D& position) {
+    processEvent(position, EventType::updateHover);
+}
+void StateMachineInstance::pointerDown(const Vec2D& position) {
+    processEvent(position, EventType::down);
+}
+void StateMachineInstance::pointerUp(const Vec2D& position) {
+    processEvent(position, EventType::up);
 }
 
 StateMachineInstance::StateMachineInstance(const StateMachine* machine, Artboard* artboard) :
