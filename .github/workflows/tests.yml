@@ -35,8 +35,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       # Using wget from powershell take no time (using choco to install it takes 1-2 minutes)
       - name: Download Premake5
         shell: powershell
