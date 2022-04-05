@@ -13,7 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
       - name: Install
         run: |
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
