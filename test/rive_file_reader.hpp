@@ -12,7 +12,7 @@ class RiveFileReader {
 
 public:
     RiveFileReader(const char path[]) {
-        FILE* fp = fopen(path, "r");
+        FILE* fp = fopen(path, "rb");
         REQUIRE(fp != nullptr);
 
         fseek(fp, 0, SEEK_END);
