@@ -37,6 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: Vampire/setup-wsl@v1
+        with:
+          additional-packages:
+            unzip
       # Using wget from powershell take no time (using choco to install it takes 1-2 minutes)
       - name: Download Premake5
         shell: powershell
@@ -47,7 +50,6 @@ jobs:
       - name: Install
         shell: wsl-bash {0} # mingw
         run: |
-          sudo apt-get install zip -y
           unzip premake-5.0.0-alpha16-windows.zip
           chmod a+x premake5.exe
           mkdir -p $HOME/.local/bin
