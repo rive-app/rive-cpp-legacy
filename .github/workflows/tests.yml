@@ -45,7 +45,7 @@ jobs:
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip -OutFile ${{ github.workspace }}/premake-5.0.0-alpha16-windows.zip
 
       - name: Install
-        shell: wsl-bash # mingw
+        shell: wsl-bash {0} # mingw
         run: |
           unzip premake-5.0.0-alpha16-windows.zip
           chmod a+x premake5.exe
@@ -54,7 +54,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Build
-        shell: wsl-bash #mingw
+        shell: wsl-bash {0} #mingw
         run: |
           ./build.sh
           ./build.sh release
