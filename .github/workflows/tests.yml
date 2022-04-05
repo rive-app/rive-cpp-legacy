@@ -43,7 +43,9 @@ jobs:
           echo GITHUB_WORKSPACE is ${{ github.workspace }}
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta1/premake-5.0.0-beta1-windows.zip -OutFile ${{ github.workspace }}\premake-5.0.0-beta1-windows.zip
           Expand-Archive -LiteralPath ${{ github.workspace }}\premake-5.0.0-beta1-windows.zip -DestinationPath C:\
-          ls C:\
+          cd build
+          C:\premake5.exe vs2022
+          ls
 
       # - name: Install
       #   shell: bash # mingw
