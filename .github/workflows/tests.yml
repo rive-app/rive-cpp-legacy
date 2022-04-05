@@ -47,7 +47,7 @@ jobs:
       - name: Install
         shell: wsl-bash {0} # mingw
         run: |
-          sudo apt-get install unzip
+          sudo apt-get install zip -y
           unzip premake-5.0.0-alpha16-windows.zip
           chmod a+x premake5.exe
           mkdir -p $HOME/.local/bin
