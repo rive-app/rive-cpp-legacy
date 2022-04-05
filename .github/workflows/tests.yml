@@ -46,7 +46,7 @@ jobs:
           Expand-Archive -LiteralPath ${{ github.workspace }}\premake-5.0.0-beta1-windows.zip -DestinationPath C:\
           cd build
           C:\premake5.exe vs2022
-          MSBuild rive.vcxproj
+          MSBuild rive.sln /property:Configuration=Debug /property:Platform=x64
 
   build-macos:
     runs-on: macOS-latest
