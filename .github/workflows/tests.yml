@@ -36,6 +36,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: Vampire/setup-wsl@v1
       # Using wget from powershell take no time (using choco to install it takes 1-2 minutes)
       - name: Download Premake5
         shell: powershell
@@ -44,7 +45,7 @@ jobs:
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip -OutFile ${{ github.workspace }}/premake-5.0.0-alpha16-windows.zip
 
       - name: Install
-        shell: bash # mingw
+        shell: wsl-bash # mingw
         run: |
           unzip premake-5.0.0-alpha16-windows.zip
           chmod a+x premake5.exe
@@ -53,10 +54,8 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Build
-        shell: bash #mingw
+        shell: wsl-bash #mingw
         run: |
-          make -v
-          ./build.sh clean
           ./build.sh
           ./build.sh release
 
