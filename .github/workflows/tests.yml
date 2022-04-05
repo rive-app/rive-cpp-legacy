@@ -13,8 +13,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
       - name: Install
         run: |
           wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
@@ -37,7 +35,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      # Using wget from powershell take no time (using choco to install it takes 1-2 minutes)
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
       - name: Download Premake5
         shell: powershell
         run: |
@@ -47,28 +47,6 @@ jobs:
           cd build
           C:\premake5.exe vs2022
           MSBuild rive.vcxproj
-
-      # - name: Install
-      #   shell: bash # mingw
-      #   run: |
-      #     unzip premake-5.0.0-beta1-windows.zip
-      #     chmod a+x premake5.exe
-      #     mkdir -p $HOME/.local/bin
-      #     mv premake5.exe $HOME/.local/bin
-      #     echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # - name: Build
-      #   shell: bash #mingw
-      #   run: |
-      #     ./build.sh
-      #     ./build.sh release
-
-
-      # - name: Tests
-      #   shell: bash
-      #   run: |
-      #     cd dev
-      #     ./test.sh
 
   build-macos:
     runs-on: macOS-latest
