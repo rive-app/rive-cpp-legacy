@@ -66,7 +66,8 @@ void initStateMachine(int index) {
     stateMachineInstance = nullptr;
 
     if (index >= 0 && index < artboard->stateMachineCount()) {
-        stateMachineInstance = new rive::StateMachineInstance(artboard->stateMachine(index), artboard.get());
+        stateMachineInstance =
+            new rive::StateMachineInstance(artboard->stateMachine(index), artboard.get());
     }
 }
 
@@ -93,6 +94,29 @@ void initAnimation(int index) {
 
     if (index >= 0 && index < artboard->animationCount()) {
         animationInstance = new rive::LinearAnimationInstance(artboard->animation(index));
+    }
+}
+
+rive::Mat2D gInverseViewTransform;
+rive::Vec2D lastWorldMouse;
+static void glfwCursorPosCallback(GLFWwindow* window, double x, double y) {
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    lastWorldMouse = gInverseViewTransform * rive::Vec2D(x * xscale, y * yscale);
+    if (stateMachineInstance != nullptr) {
+        stateMachineInstance->pointerMove(lastWorldMouse);
+    }
+}
+void glfwMouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+    if (stateMachineInstance != nullptr) {
+        switch (action) {
+            case GLFW_PRESS:
+                stateMachineInstance->pointerDown(lastWorldMouse);
+                break;
+            case GLFW_RELEASE:
+                stateMachineInstance->pointerUp(lastWorldMouse);
+                break;
+        }
     }
 }
 
@@ -126,13 +150,11 @@ static void post_mouse_event(rive::Artboard* artboard, const SkMatrix& ctm) {
     static bool gPrevMouseButtonDown = false;
     const bool isDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
 
-    if (mouse.x == gPrevMousePos.x &&
-        mouse.y == gPrevMousePos.y &&
-        isDown == gPrevMouseButtonDown)
+    if (mouse.x == gPrevMousePos.x && mouse.y == gPrevMousePos.y && isDown == gPrevMouseButtonDown)
     {
         return;
     }
-    
+
     auto evtType = rive::PointerEventType::move;
     if (isDown && !gPrevMouseButtonDown) {
         evtType = rive::PointerEventType::down; // we just went down
@@ -145,10 +167,10 @@ static void post_mouse_event(rive::Artboard* artboard, const SkMatrix& ctm) {
 
     SkMatrix inv;
     (void)ctm.invert(&inv);
-    
+
     // scale by 2 for the DPI of a high-res monitor
     const auto pt = inv.mapXY(mouse.x * 2, mouse.y * 2);
-    
+
     const int pointerIndex = 0; // til we track more than one button/mouse
     rive::PointerEvent evt = {
         evtType,
@@ -187,6 +209,8 @@ int main() {
     }
 
     glfwSetDropCallback(window, glfwDropCallback);
+    glfwSetCursorPosCallback(window, glfwCursorPosCallback);
+    glfwSetMouseButtonCallback(window, glfwMouseButtonCallback);
     glfwMakeContextCurrent(window);
     if (gl3wInit() != 0) {
         fprintf(stderr, "Failed to make initialize gl3w.\n");
@@ -279,12 +303,17 @@ int main() {
 
             rive::SkiaRenderer renderer(canvas);
             renderer.save();
-            renderer.align(rive::Fit::contain,
-                           rive::Alignment::center,
-                           rive::AABB(0, 0, width, height),
-                           artboard->bounds());
 
-            post_mouse_event(artboard.get(), canvas->getTotalMatrix());
+            rive::Mat2D viewTransform;
+            renderer.computeAlignment(viewTransform,
+                                      rive::Fit::contain,
+                                      rive::Alignment::center,
+                                      rive::AABB(0, 0, width, height),
+                                      artboard->bounds());
+            renderer.transform(viewTransform);
+            // Store the inverse view so we can later go from screen to world.
+            rive::Mat2D::invert(gInverseViewTransform, viewTransform);
+            // post_mouse_event(artboard.get(), canvas->getTotalMatrix());
 
             artboard->draw(&renderer);
             renderer.restore();
@@ -376,8 +405,9 @@ int main() {
                 ImGui::Columns(1);
             }
             ImGui::End();
-            
+
             test_messages(artboard.get());
+
         } else {
             ImGui::Text("Drop a .riv file to preview.");
         }
