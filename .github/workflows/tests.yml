@@ -51,7 +51,6 @@ jobs:
           cd build
           C:\premake5.exe vs2022
           MSBuild rive.sln /property:Configuration=Debug /property:Platform=x64
-          ls windows\obj\debug\
           cd ..
 
       - name: Build rive tests
@@ -60,7 +59,7 @@ jobs:
           cd dev/test
           C:\premake5.exe vs2022
           MSBuild rive_tests.sln
-          ls windows\obj\debug\
+          ls build\obj\debug\
 
   build-macos:
     runs-on: macOS-latest
