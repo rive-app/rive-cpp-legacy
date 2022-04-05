@@ -52,9 +52,7 @@ jobs:
         run: |
           unzip premake-5.0.0-alpha16-windows.zip
           chmod a+x premake5.exe
-          mkdir -p $HOME/.local/bin
-          mv premake5.exe $HOME/.local/bin
-          echo "$HOME/.local/bin" >> $PATH
+          sudo mv premake5 /usr/local/bin
 
       - name: Build
         shell: wsl-bash {0} #mingw
