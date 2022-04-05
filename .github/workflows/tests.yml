@@ -59,7 +59,7 @@ jobs:
         run: |
           cd dev/test
           C:\premake5.exe vs2022
-          MSBuild rive_tests.sln /property:Configuration=Debug /property:Platform="Any CPU"
+          MSBuild rive_tests.sln
           ls windows\obj\debug\
 
   build-macos:
