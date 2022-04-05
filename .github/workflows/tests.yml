@@ -45,7 +45,7 @@ jobs:
           Expand-Archive -LiteralPath ${{ github.workspace }}\premake-5.0.0-beta1-windows.zip -DestinationPath C:\
           cd build
           C:\premake5.exe vs2022
-          ls
+          MSBuild rive.vcxproj
 
       # - name: Install
       #   shell: bash # mingw
