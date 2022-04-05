@@ -23,6 +23,7 @@ jobs:
 
       - name: Build
         run: |
+          ./build.sh clean
           ./build.sh
           ./build.sh release
 
