@@ -59,7 +59,7 @@ jobs:
           cd dev/test
           C:\premake5.exe vs2022
           MSBuild rive_tests.sln
-          ls build\obj\debug\
+          ls build\bin\debug\
 
   build-macos:
     runs-on: macOS-latest
