@@ -53,13 +53,13 @@ jobs:
           MSBuild rive.sln /property:Configuration=Debug /property:Platform=x64
           cd ..
 
-      - name: Build rive tests
+      - name: Run rive tests
         shell: powershell
         run: |
           cd dev/test
           C:\premake5.exe vs2022
           MSBuild rive_tests.sln
-          ls build\bin\debug\
+          build\bin\debug\tests.exe
 
   build-macos:
     runs-on: macOS-latest
