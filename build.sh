@@ -37,11 +37,9 @@ else
             make clean
             make clean config=release
         elif [ "$OPTION" = "release" ]; then
-            cat rive.make
-            make config=release -j7
+            verbose=1 make config=release -j7
         else
-            cat rive.make
-            make -j7
+            verbose=1 make -j7
         fi
     }
 
