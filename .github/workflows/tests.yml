@@ -55,6 +55,7 @@ jobs:
       - name: Build
         shell: bash #mingw
         run: |
+          make -v
           ./build.sh clean
           ./build.sh
           ./build.sh release
