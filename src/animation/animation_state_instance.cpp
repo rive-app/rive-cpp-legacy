@@ -4,9 +4,9 @@
 using namespace rive;
 
 AnimationStateInstance::AnimationStateInstance(const AnimationState* state,
-                                               Artboard* instance) :
+                                               ArtboardInstance* artboard) :
     StateInstance(state),
-    m_AnimationInstance(state->animation(), instance),
+    m_AnimationInstance(state->animation(), artboard),
     m_KeepGoing(true)
 {}
 

@@ -3,6 +3,7 @@
 #include "rive/generated/animation/nested_linear_animation_base.hpp"
 #include <stdio.h>
 namespace rive {
+    class ArtboardInstance;
     class LinearAnimationInstance;
     class NestedLinearAnimation : public NestedLinearAnimationBase {
     protected:
@@ -11,7 +12,7 @@ namespace rive {
     public:
         ~NestedLinearAnimation();
 
-        void initializeAnimation(Artboard* artboard) override;
+        void initializeAnimation(ArtboardInstance*) override;
     };
 } // namespace rive
 

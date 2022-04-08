@@ -23,9 +23,9 @@ namespace rive {
         const T* blendAnimation() const { return m_BlendAnimation; }
         const LinearAnimationInstance* animationInstance() const { return &m_AnimationInstance; }
 
-        BlendStateAnimationInstance(const T* blendAnimation, Artboard* instance) :
+        BlendStateAnimationInstance(const T* blendAnimation, ArtboardInstance* artboard) :
             m_BlendAnimation(blendAnimation),
-            m_AnimationInstance(blendAnimation->animation(), instance)
+            m_AnimationInstance(blendAnimation->animation(), artboard)
         {}
 
         void mix(float value) { m_Mix = value; }
@@ -37,10 +37,10 @@ namespace rive {
         bool m_KeepGoing = true;
 
     public:
-        BlendStateInstance(const K* blendState, Artboard* instance) : StateInstance(blendState) {
+        BlendStateInstance(const K* blendState, ArtboardInstance* artboard) : StateInstance(blendState) {
             for (auto blendAnimation : blendState->animations()) {
                 m_AnimationInstances.emplace_back(
-                    BlendStateAnimationInstance<T>(static_cast<T*>(blendAnimation), instance));
+                    BlendStateAnimationInstance<T>(static_cast<T*>(blendAnimation), artboard));
             }
         }
 

@@ -6,7 +6,7 @@ namespace rive {
     class NestedStateMachine : public NestedStateMachineBase {
     public:
         void advance(float elapsedSeconds) override;
-        void initializeAnimation(Artboard* artboard) override;
+        void initializeAnimation(ArtboardInstance*) override;
     };
 } // namespace rive
 
