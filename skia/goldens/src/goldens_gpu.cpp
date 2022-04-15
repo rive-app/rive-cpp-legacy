@@ -13,7 +13,7 @@
 #include "skia/include/gpu/gl/GrGLInterface.h"
 #include "skia/include/gpu/gl/GrGLAssembleInterface.h"
 #include "skia/third_party/externals/libpng/png.h"
-#include "tools/write_png_file.hpp"
+#include "write_png_file.hpp"
 #include <iostream>
 #include <string>
 

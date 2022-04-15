@@ -93,6 +93,107 @@ project "goldens"
     defines {"NDEBUG"}
     optimize "On"
 
+project "goldens_gpu"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++17"
+    toolset "clang"
+    targetdir "bin/%{cfg.buildcfg}"
+    objdir "obj/%{cfg.buildcfg}"
+    includedirs {
+        "../../utils",
+        "../../dependencies/glfw/include",
+        "../src",
+        "../../../include",
+        "../../renderer/include",
+        "../../dependencies/",
+        "../../dependencies/skia",
+        "../../dependencies/skia/include/core",
+        "../../dependencies/skia/third_party/libpng",
+    }
+
+    if os.host() == 'macosx' then
+        links {
+            "Cocoa.framework",
+            "CoreFoundation.framework",
+            "CoreMedia.framework",
+            "CoreServices.framework",
+            "IOKit.framework",
+            "Security.framework",
+            "OpenGL.framework",
+            "bz2",
+            "iconv",
+            "lzma",
+            "rive_skia_renderer",
+            "rive",
+            "skia",
+            "glfw3",
+            "z"  -- lib av format
+        }
+        libdirs {
+            "../dependencies/glfw/build/src",
+        }
+    elseif os.host() == "windows" then
+        architecture "x64"
+        links {
+            "rive_skia_renderer",
+            "rive",
+            "skia.lib",
+            "glfw3.lib",
+            "opengl32.lib"
+        }
+        libdirs {
+            "../dependencies/glfw/build/src/Release",
+        }
+        defines {"_USE_MATH_DEFINES", "_CRT_SECURE_NO_WARNINGS"}
+        buildoptions {WINDOWS_CLANG_CL_SUPPRESSED_WARNINGS}
+        staticruntime "on"  -- Match Skia's /MT flag for link compatibility
+        runtime "Release"  -- Use /MT even in debug (/MTd is incompatible with Skia)
+    else
+        links {
+            "m",
+            "rive_skia_renderer",
+            "rive",
+            "skia",
+            "glfw3",
+            "z",
+            "dl",
+            "pthread",
+            "GL"
+        }
+        libdirs {
+            "../dependencies/glfw/build/src",
+        }
+    end
+
+    libdirs {
+        "../build/%{cfg.system}/bin/%{cfg.buildcfg}",
+        "../../dependencies/skia/out/static",
+        "../../renderer/build/%{cfg.system}/bin/%{cfg.buildcfg}",
+    }
+
+    files {
+        "../../utils/*.cpp",
+        "../src/goldens_gpu.cpp",
+        "../src/goldens_grid.cpp",
+    }
+
+    buildoptions {"-Wall", "-fno-rtti"}
+
+    defines {
+        "SK_GL",
+        "GL_SILENCE_DEPRECATION",  -- For glReadPixels()
+    }
+
+    filter "configurations:debug"
+    defines {"DEBUG"}
+    symbols "On"
+
+    filter "configurations:release"
+    defines {"RELEASE"}
+    defines {"NDEBUG"}
+    optimize "On"
+
 
 -- Clean Function --
 newaction {
