@@ -79,14 +79,17 @@ void LinearGradient::update(ComponentDirt value) {
         const double ro = opacity() * renderOpacity();
         const auto count = m_Stops.size();
         // TODO: replace these with stack-alloc helpers?
-        ColorInt colors[count];
-        float stops[count];
+        ColorInt* colors = new ColorInt[count];
+        float* stops = new float[count];
         for (size_t i = 0; i < count; ++i) {
             colors[i] = colorModulateOpacity(m_Stops[i]->colorValue(), ro);
             stops[i] = m_Stops[i]->position();
         }
 
         makeGradient(start, end, colors, stops, count);
+
+        delete[] stops;
+        delete[] colors;
     }
 }
 
