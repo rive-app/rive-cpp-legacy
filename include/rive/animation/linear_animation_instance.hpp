@@ -51,6 +51,9 @@ namespace rive {
         // between 0 and 1) is the strength at which the animation is mixed with
         // other animations applied to the artboard.
         void apply(float mix = 1.0f) const {
+            if (m_Animation == nullptr) {
+                return;
+            }
             m_Animation->apply(m_ArtboardInstance, m_Time, mix);
         }
 
@@ -69,7 +72,7 @@ namespace rive {
         float speed() const;
         float startSeconds() const;
         std::string name() const;
-    
+
         // Returns either the animation's default or overridden loop values
         Loop loop() { return (Loop)loopValue(); }
         int loopValue();
