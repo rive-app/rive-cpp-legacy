@@ -22,6 +22,18 @@
 using namespace rive;
 
 Artboard::~Artboard() {
+    this->deleteObjects();
+
+    // If we were an instance, these arrays will already have been cleared.
+    for (auto object : m_Animations) {
+        delete object;
+    }
+    for (auto object : m_StateMachines) {
+        delete object;
+    }
+}
+
+void Artboard::deleteObjects() {
     for (auto object : m_Objects) {
         // First object is artboard
         if (object == this) {
@@ -29,19 +41,7 @@ Artboard::~Artboard() {
         }
         delete object;
     }
-
-    // Instances reference back to the original artboard's animations and state
-    // machines, so don't delete them here, they'll get cleaned up when the
-    // source is deleted.
-    // TODO: move this logic into ArtboardInstance destructor???
-    if (!m_IsInstance) {
-        for (auto object : m_Animations) {
-            delete object;
-        }
-        for (auto object : m_StateMachines) {
-            delete object;
-        }
-    }
+    m_Objects.clear();
 }
 
 static bool canContinue(StatusCode code) {
@@ -536,6 +536,8 @@ std::unique_ptr<ArtboardInstance> Artboard::instance() const {
         }
     }
 
+    // note: we just push bare pointers here. The instance is not an owner
+    // of these objeccts (we are).
     for (auto animation : m_Animations) {
         artboardClone->m_Animations.push_back(animation);
     }
@@ -545,11 +547,8 @@ std::unique_ptr<ArtboardInstance> Artboard::instance() const {
 
     if (artboardClone->initialize() != StatusCode::Ok) {
         artboardClone = nullptr;
-    } else {
-        artboardClone->m_IsInstance = true;
     }
 
-    assert(artboardClone->isInstance());
     return artboardClone;
 }
 
@@ -594,6 +593,17 @@ bool Artboard::nextMessage(Message* msg) {
 
 #include "rive/animation/linear_animation_instance.hpp"
 #include "rive/animation/state_machine_instance.hpp"
+
+ArtboardInstance::~ArtboardInstance() {
+    this->deleteObjects();
+
+    // Instances reference back to the original artboard's animations and state
+    // machines, so don't delete them here, they'll get cleaned up when the
+    // source is deleted. Thus, so that our baseclass Artboard doesn't delete
+    // them, we clear the arrays now (w/o deleting the elements)
+    m_Animations.clear();
+    m_StateMachines.clear();
+}
 
 std::unique_ptr<LinearAnimationInstance> ArtboardInstance::animationAt(size_t index) {
     auto la = this->animation(index);
