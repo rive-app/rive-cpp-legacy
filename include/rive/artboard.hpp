@@ -31,10 +31,16 @@ namespace rive {
         friend class ArtboardImporter;
         friend class Component;
 
-    private:
-        std::vector<Core*> m_Objects;
+    protected:
+        void deleteObjects();   // call from destructors
+    
+        // these are owned if we are not an instance, but are not owned
+        // if we are an instance.
         std::vector<LinearAnimation*> m_Animations;
         std::vector<StateMachine*> m_StateMachines;
+
+    private:
+        std::vector<Core*> m_Objects;
         std::vector<Component*> m_DependencyOrder;
         std::vector<Drawable*> m_Drawables;
         std::vector<DrawTarget*> m_DrawTargets;
@@ -45,7 +51,6 @@ namespace rive {
         std::unique_ptr<CommandPath> m_ClipPath;
         Factory* m_Factory = nullptr;
         Drawable* m_FirstDrawable = nullptr;
-        bool m_IsInstance = false;
         bool m_FrameOrigin = true;
 
         std::queue<Message> m_MessageQueue;
@@ -68,7 +73,7 @@ namespace rive {
 
     public:
         Artboard() {}
-        ~Artboard();
+        ~Artboard() override;
         StatusCode initialize();
 
         Core* resolve(uint32_t id) const override;
@@ -151,7 +156,7 @@ namespace rive {
         std::unique_ptr<ArtboardInstance> instance() const;
 
         /// Returns true if the artboard is an instance of another
-        bool isInstance() const { return m_IsInstance; }
+        virtual bool isInstance() const { return false; }
 
         /// Returns true when the artboard will shift the origin from the top
         /// left to the relative width/height of the artboard itself. This is
@@ -171,6 +176,9 @@ namespace rive {
     class ArtboardInstance : public Artboard {
     public:
         ArtboardInstance() {}
+        ~ArtboardInstance() override;
+
+        bool isInstance() const override { return true; }
 
         std::unique_ptr<LinearAnimationInstance> animationAt(size_t index);
         std::unique_ptr<LinearAnimationInstance> animationNamed(std::string name);
