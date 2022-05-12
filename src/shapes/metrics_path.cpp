@@ -106,6 +106,10 @@ static float segmentCubic(const Vec2D& from,
     return runningLength;
 }
 
+static float calcLerp(float from, float to, float f) {
+    return from + f * (to - from);
+}
+
 float MetricsPath::computeLength(const Mat2D& transform) {
     // If the pre-computed length is still valid (transformed with the same
     // transform) just return that.
@@ -244,8 +248,6 @@ void MetricsPath::trim(float startLength, float endLength, bool moveTo, RenderPa
     }
 }
 
-float lerp(float from, float to, float f) { return from + f * (to - from); }
-
 void MetricsPath::extractSubPart(
     int index, float startT, float endT, bool moveTo, RenderPath* result) {
     assert(startT >= 0.0f && startT <= 1.0f && endT >= 0.0f && endT <= 1.0f);
@@ -283,7 +285,7 @@ void MetricsPath::extractSubPart(
 
                             float t =
                                 (startLength - previousLength) / (segment.length - previousLength);
-                            startT = lerp(m_CubicSegments[si - 1].t, segment.t, t);
+                            startT = calcLerp(m_CubicSegments[si - 1].t, segment.t, t);
                         }
                         // Help out the ending segment finder by setting its
                         // start to where we landed while finding the first
@@ -306,7 +308,7 @@ void MetricsPath::extractSubPart(
 
                             float t =
                                 (endLength - previousLength) / (segment.length - previousLength);
-                            endT = lerp(m_CubicSegments[si - 1].t, segment.t, t);
+                            endT = calcLerp(m_CubicSegments[si - 1].t, segment.t, t);
                         }
                         break;
                     }
