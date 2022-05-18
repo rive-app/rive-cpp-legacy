@@ -25,6 +25,7 @@
 #include "rive/animation/animation_state.hpp"
 #include "rive/animation/blend_state_1d.hpp"
 #include "rive/animation/blend_state_direct.hpp"
+#include "rive/math/type_conversions.hpp"
 
 // Default namespace for Rive Cpp code
 using namespace rive;
@@ -60,11 +61,11 @@ static Core* readRuntimeObject(BinaryReader& reader, const RuntimeHeader& header
             break;
         }
 
-        if (reader.didOverflow()) {
+        if (reader.didOverflow() || !fitsIn<uint16_t>(propertyKey)) {
             delete object;
             return nullptr;
         }
-        if (object == nullptr || !object->deserialize((int)propertyKey, reader)) {
+        if (object == nullptr || !object->deserialize((uint16_t)propertyKey, reader)) {
             // We have an unknown object or property, first see if core knows
             // the property type.
             int id = CoreRegistry::propertyFieldId((int)propertyKey);

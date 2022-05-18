@@ -3,6 +3,7 @@
 #include "rive/shapes/vertex.hpp"
 #include "rive/shapes/mesh_vertex.hpp"
 #include "rive/bones/skin.hpp"
+#include "rive/math/type_conversions.hpp"
 #include "rive/artboard.hpp"
 #include "rive/factory.hpp"
 #include "rive/span.hpp"
@@ -59,8 +60,8 @@ void Mesh::decodeTriangleIndexBytes(Span<const uint8_t> value) {
     BinaryReader reader(value);
     while (!reader.reachedEnd()) {
         uint64_t index = reader.readVarUint64();
-        assert(index < std::numeric_limits<uint16_t>::max());
-        buffer->push_back(index);
+        // TODO: if index *is* out of range, mark this mesh (and file?) as invalid
+        buffer->push_back(castTo<uint16_t>(index));
     }
     m_IndexBuffer = buffer;
 }
