@@ -39,5 +39,6 @@
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include <math.h>
 
 #endif // rive_types
