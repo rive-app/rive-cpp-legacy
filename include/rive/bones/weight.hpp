@@ -14,10 +14,8 @@ namespace rive {
 
         StatusCode onAddedDirty(CoreContext* context) override;
 
-        static Vec2D deform(Vec2D inPoint,
-                            unsigned int indices,
+        static Mat2D deform(unsigned int indices,
                             unsigned int weights,
-                            const Mat2D& world,
                             const float* boneTransforms);
     };
 } // namespace rive
