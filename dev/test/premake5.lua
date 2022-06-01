@@ -84,8 +84,10 @@ buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
 
 includedirs {"./include", "../../include"}
 
-files {"../../src/**.cpp", -- the Rive runtime source
-"../../test/**.cpp" -- the tests
+files {
+    "../../src/**.cpp",  -- the Rive runtime source
+    "../../test/**.cpp", -- the tests
+    "../../include/capi/**.cpp",
 }
 
 defines {"TESTING", "ENABLE_QUERY_FLAT_VERTICES"}
