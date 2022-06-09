@@ -19,7 +19,7 @@ namespace rive {
         int m_LoopValue = -1;
 
     public:
-        LinearAnimationInstance(const LinearAnimation*, ArtboardInstance*);
+        LinearAnimationInstance(const LinearAnimation*, rcp<ArtboardInstance>);
 
         // Advance the animation by the specified time. Returns true if the
         // animation will continue to animate after this advance.
@@ -52,7 +52,7 @@ namespace rive {
         // between 0 and 1) is the strength at which the animation is mixed with
         // other animations applied to the artboard.
         void apply(float mix = 1.0f) const {
-            m_Animation->apply(m_ArtboardInstance, m_Time, mix);
+            m_Animation->apply(m_ArtboardInstance.get(), m_Time, mix);
         }
 
         // Set when the animation is advanced, true if the animation has stopped

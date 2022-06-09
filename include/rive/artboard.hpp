@@ -32,6 +32,7 @@ namespace rive {
         friend class Component;
 
     private:
+        File* m_File;
         std::vector<Core*> m_Objects;
         std::vector<LinearAnimation*> m_Animations;
         std::vector<StateMachine*> m_StateMachines;
@@ -63,7 +64,7 @@ namespace rive {
         void addNestedArtboard(NestedArtboard* object);
 
     public:
-        Artboard() {}
+        Artboard(File* file) : m_File(file) {}
         ~Artboard();
         StatusCode initialize();
 
@@ -158,9 +159,11 @@ namespace rive {
         StatusCode import(ImportStack& importStack) override;
     };
 
-    class ArtboardInstance : public Artboard {
+    class ArtboardInstance : public Artboard, public RefCnt {
+        rcp<File> m_File;
+    
     public:
-        ArtboardInstance() {}
+        ArtboardInstance(rcp<File> file);
 
         std::unique_ptr<LinearAnimationInstance> animationAt(size_t index);
         std::unique_ptr<LinearAnimationInstance> animationNamed(const std::string& name);

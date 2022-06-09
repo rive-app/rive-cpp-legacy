@@ -124,6 +124,53 @@ TEST_CASE("long name in object is parsed correctly", "[file]") {
     REQUIRE(artboard->objects().size() == 7);
 }
 
+const char* gRivFileNames[] = {
+    "blend_test.riv",
+    "bullet_man.riv",
+    "circle_clips.riv",
+    "complex_ik_dependency.riv",
+    "dependency_test.riv",
+    "distance_constraint.riv",
+    "draw_rule_cycle.riv",
+    "entry.riv",
+    "fix_rectangle.riv",
+    "juice.riv",
+    "light_switch.riv",
+    "long_name.riv",
+    "multiple_state_machines.riv",
+    "off_road_car.riv",
+    "out_of_band",
+    "rocket.riv",
+    "rotation_constraint.riv",
+    "scale_constraint.riv",
+    "shapetest.riv",
+    "stroke_name_test.riv",
+    "tape.riv",
+    "transform_constraint.riv",
+    "translation_constraint.riv",
+    "trim_path_linear.riv",
+    "two_artboards.riv",
+    "two_bone_ik.riv",
+    "walle.riv",
+};
+
+TEST_CASE("bookkeeping for files and artboard instances", "[file]") {
+    for (auto name : gRivFileNames) {
+        std::string path("../../test/assets/") + name;
+        auto file = ReadRiveFile(path.c_str());
+        auto abi = file->artboardAt(0);
+        file = nullptr; // unref the file, but abi should still be an owner
+
+        auto anim = abi->animationAt(0);
+        abi = nillptr;  // unref the artboardinstance, but anim should still be an owner
+        
+        anim->advanceAndApply(0);
+
+        rive::NoOpRenderer renderer;
+        anim->draw(&renderer);
+    }
+}
+
 // TODO:
 // ShapePaint (fill/stroke) needs to be implemented in WASM (jsFill/jsStroke) in
 // order to create Paint objects as necessary.

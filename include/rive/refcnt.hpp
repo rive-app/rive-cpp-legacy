@@ -161,6 +161,14 @@ namespace rive {
         return a.get() != b.get();
     }
 
+    template <typename T> rcp<T> rive_ref_sp(T* obj) {
+        return rcp<T>(safe_ref(obj));
+    }
+
+    template <typename T> rcp<T> rive_ref_sp(const T* obj) {
+        return rcp<T>(const_cast<T*>(safe_ref(obj)));
+}
+
 } // namespace rive
 
 #endif

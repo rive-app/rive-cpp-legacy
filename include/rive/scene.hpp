@@ -1,6 +1,7 @@
 #ifndef _RIVE_SCENE_HPP_
 #define _RIVE_SCENE_HPP_
 
+#include "rive/refcnt.hpp"
 #include "rive/animation/loop.hpp"
 #include "rive/math/aabb.hpp"
 #include "rive/math/vec2d.hpp"
@@ -17,12 +18,12 @@ namespace rive {
 
     class Scene {    
     protected:
-        ArtboardInstance* m_ArtboardInstance;
+        rcp<ArtboardInstance> m_ArtboardInstance;
 
-        Scene(ArtboardInstance*);
+        Scene(rcp<ArtboardInstance>);
 
     public:
-        virtual ~Scene() {}
+        virtual ~Scene();
     
         float width() const;
         float height() const;

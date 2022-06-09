@@ -45,7 +45,7 @@ namespace rive {
         InstType* getNamedInput(const std::string& name) const;
 
     public:
-        StateMachineInstance(const StateMachine* machine, ArtboardInstance* instance);
+        StateMachineInstance(const StateMachine* machine, rcp<ArtboardInstance>);
         ~StateMachineInstance() override;
 
         // Advance the state machine by the specified time. Returns true if the

@@ -1,6 +1,7 @@
 #ifndef _RIVE_FILE_HPP_
 #define _RIVE_FILE_HPP_
 
+#include "rive/refcnt.hpp"
 #include "rive/artboard.hpp"
 #include "rive/backboard.hpp"
 #include "rive/factory.hpp"
@@ -30,7 +31,7 @@ namespace rive {
     ///
     /// A Rive file.
     ///
-    class File {
+    class File : public RefCnt {
     public:
         /// Major version number supported by the runtime.
         static const int majorVersion = 7;

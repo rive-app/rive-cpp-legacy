@@ -7,6 +7,7 @@
 #include "rive/draw_target.hpp"
 #include "rive/draw_target_placement.hpp"
 #include "rive/drawable.hpp"
+#include "rive/file.hpp"
 #include "rive/animation/keyed_object.hpp"
 #include "rive/node.hpp"
 #include "rive/renderer.hpp"
@@ -522,7 +523,7 @@ int Artboard::defaultStateMachineIndex() const {
 }
 
 std::unique_ptr<ArtboardInstance> Artboard::instance() const {
-    std::unique_ptr<ArtboardInstance> artboardClone(new ArtboardInstance);
+    std::unique_ptr<ArtboardInstance> artboardClone(new ArtboardInstance(rive_ref_sp(m_File)));
     artboardClone->copy(*this);
 
     artboardClone->m_Factory = m_Factory;
@@ -584,24 +585,29 @@ StatusCode Artboard::import(ImportStack& importStack) {
 #include "rive/animation/linear_animation_instance.hpp"
 #include "rive/animation/state_machine_instance.hpp"
 
+ArtboardInstance::ArtboardInstance(rcp<File> file) :
+    Artboard(file.get()),
+    m_File(std::move(file))
+{}
+
 std::unique_ptr<LinearAnimationInstance> ArtboardInstance::animationAt(size_t index) {
     auto la = this->animation(index);
-    return la ? std::make_unique<LinearAnimationInstance>(la, this) : nullptr;
+    return la ? std::make_unique<LinearAnimationInstance>(la, rive_ref_sp(this)) : nullptr;
 }
 
 std::unique_ptr<LinearAnimationInstance> ArtboardInstance::animationNamed(const std::string& name) {
     auto la = this->animation(name);
-    return la ? std::make_unique<LinearAnimationInstance>(la, this) : nullptr;
+    return la ? std::make_unique<LinearAnimationInstance>(la, rive_ref_sp(this)) : nullptr;
 }
 
 std::unique_ptr<StateMachineInstance> ArtboardInstance::stateMachineAt(size_t index) {
     auto sm = this->stateMachine(index);
-    return sm ? std::make_unique<StateMachineInstance>(sm, this) : nullptr;
+    return sm ? std::make_unique<StateMachineInstance>(sm, rive_ref_sp(this)) : nullptr;
 }
 
 std::unique_ptr<StateMachineInstance> ArtboardInstance::stateMachineNamed(const std::string& name) {
     auto sm = this->stateMachine(name);
-    return sm ? std::make_unique<StateMachineInstance>(sm, this) : nullptr;
+    return sm ? std::make_unique<StateMachineInstance>(sm, rive_ref_sp(this)) : nullptr;
 }
 
 std::unique_ptr<StateMachineInstance> ArtboardInstance::defaultStateMachine() {

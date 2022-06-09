@@ -1,6 +1,7 @@
 #include "rive/nested_artboard.hpp"
 #include "rive/artboard.hpp"
 #include "rive/backboard.hpp"
+#include "rive/file.hpp"
 #include "rive/importers/import_stack.hpp"
 #include "rive/importers/backboard_importer.hpp"
 #include "rive/nested_animation.hpp"
