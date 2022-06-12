@@ -33,7 +33,8 @@ bin/gn gen out/ios64 --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
@@ -72,7 +73,8 @@ bin/gn gen out/ios32 --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
@@ -111,7 +113,8 @@ bin/gn gen out/iossim_x86 --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
@@ -150,7 +153,8 @@ bin/gn gen out/iossim_x64 --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
@@ -182,7 +186,8 @@ bin/gn gen out/iossim_arm64 --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
@@ -232,7 +237,8 @@ bin/gn gen out/static --type=static_library --args=" \
     skia_use_libjpeg_turbo_encode=false \
     skia_use_libjpeg_turbo_decode=false \
     skia_use_libwebp_encode=false \
-    skia_use_libwebp_decode=false \
+    skia_use_libwebp_decode=true \
+    skia_use_system_libwebp=false \
     skia_use_lua=false \
     skia_use_piex=false \
     skia_use_vulkan=false \
