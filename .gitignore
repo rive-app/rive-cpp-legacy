@@ -89,6 +89,8 @@ skia/viewer/build/windows/dependencies/gl3w
 skia/viewer/build/windows/dependencies/skia
 skia/viewer/build/windows/dependencies/glfw
 skia/viewer/build/windows/dependencies/glfw_build
+skia/viewer/build/windows/dependencies/bin
+skia/viewer/build/windows/bin
 skia/viewer/build/windows/obj
 skia/viewer/build/windows/*.sln
 skia/viewer/build/windows/*.vcxproj
