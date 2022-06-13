@@ -11,7 +11,7 @@ pushd .\glfw
 git checkout master
 popd
 
-mkdir -p glfw_build
+mkdir glfw_build
 cd glfw_build
 cmake ../glfw -DBUILD_SHARED_LIBS=OFF
 rem Force compile with /MT, GLFW defaults to /MDd but the rest of our libs expect /MT
