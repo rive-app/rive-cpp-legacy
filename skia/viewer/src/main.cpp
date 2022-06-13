@@ -69,6 +69,7 @@ std::vector<std::string> stateMachineNames;
 
 constexpr int REQUEST_DEFAULT_SCENE = -1;
 
+#ifdef RIVE_EXPERIMENTS
 #include <time.h>
 double GetSecondsToday() {
     time_t m_time;
@@ -90,6 +91,7 @@ double GetSecondsToday() {
 //    printf("%g %g %g\n", secs, secs/60, secs/60/60);
     return secs;
 }
+#endif
 
 // We hold onto the file's bytes for the lifetime of the file, in case we want
 // to change animations or state-machines, we just rebuild the rive::File from
@@ -325,10 +327,12 @@ int main() {
         canvas->drawPaint(paint);
 
         if (currentScene) {
+#ifdef RIVE_EXPERIMENTS
             // See if we can "set the time" e.g. clock statemachine
             if (auto num = currentScene->getNumber("isTime")) {
                 num->value(GetSecondsToday()/60/60);
             }
+#endif
 
             currentScene->advanceAndApply(elapsed);
 
