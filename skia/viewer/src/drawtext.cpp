@@ -6,6 +6,8 @@
 #include "skia_renderer.hpp"
 #include "skia_rive_fontmgr.hpp"
 
+extern rive::rcp<rive::RenderFont> rive_make_harfbuzz_renderfont(rive::Span<const uint8_t>);
+
 #include <string>
 
 static void drawrun(rive::Factory* factory, rive::Renderer* renderer,
