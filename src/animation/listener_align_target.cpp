@@ -1,7 +1,5 @@
 #include "rive/animation/listener_align_target.hpp"
 #include "rive/animation/state_machine_instance.hpp"
-// #include "rive/animation/state_machine_number.hpp"
-// #include "rive/animation/state_machine_input_instance.hpp"
 #include "rive/node.hpp"
 #include "rive/constraints/constraint.hpp"
 
