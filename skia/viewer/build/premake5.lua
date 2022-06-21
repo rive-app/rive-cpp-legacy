@@ -59,6 +59,7 @@ project "rive_viewer"
     }
 
     buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
+    defines { "RIVE_EXPERIMENTS" }
 
     filter "configurations:debug"
         buildoptions {"-g"}
