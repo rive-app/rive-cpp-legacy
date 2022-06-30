@@ -29,3 +29,9 @@ TEST_CASE("default state machine is detected at load", "[file]") {
     REQUIRE(scene != nullptr);
     REQUIRE(scene->name() == smi->name());
 }
+
+TEST_CASE("load default scene", "[file]") {
+    auto bytes = ReadFile("../../test/assets/entry.riv");
+    auto scene = rive::Scene::importDefault(rive::toSpan(bytes), &rive::gNoOpFactory);
+    REQUIRE(scene.get());
+}

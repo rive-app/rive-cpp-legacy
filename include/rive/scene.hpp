@@ -51,6 +51,8 @@ namespace rive {
         virtual SMIBool* getBool(const std::string&) const;
         virtual SMINumber* getNumber(const std::string&) const;
         virtual SMITrigger* getTrigger(const std::string&) const;
+
+        static std::unique_ptr<Scene> importDefault(Span<uint8_t>, Factory*);
     };
 
 } // namespace rive

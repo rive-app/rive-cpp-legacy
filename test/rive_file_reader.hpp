@@ -6,16 +6,9 @@
 #include "no_op_factory.hpp"
 #include "../src/render_counter.hpp"
 
-static inline std::unique_ptr<rive::File>
-ReadRiveFile(const char path[],
-             rive::Factory* factory = nullptr,
-             rive::FileAssetResolver* resolver = nullptr) {
-    if (!factory) {
-        factory = &rive::gNoOpFactory;
-    }
-
+static inline std::vector<uint8_t> ReadFile(const char path[]) {
     FILE* fp = fopen(path, "rb");
-    REQUIRE(fp != nullptr);
+    REQUIRE(fp);
 
     fseek(fp, 0, SEEK_END);
     const size_t length = ftell(fp);
@@ -23,6 +16,19 @@ ReadRiveFile(const char path[],
     std::vector<uint8_t> bytes(length);
     REQUIRE(fread(bytes.data(), 1, length, fp) == length);
     fclose(fp);
+
+    return bytes;
+}
+
+static inline std::unique_ptr<rive::File>
+ReadRiveFile(const char path[],
+             rive::Factory* factory = nullptr,
+             rive::FileAssetResolver* resolver = nullptr) {
+    if (!factory) {
+        factory = &rive::gNoOpFactory;
+    }
+    
+    auto bytes = ReadFile(path);
 
     rive::ImportResult result;
     auto file = rive::File::import(rive::toSpan(bytes), factory, &result, resolver);
