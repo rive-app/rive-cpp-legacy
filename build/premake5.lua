@@ -72,6 +72,8 @@ project "rive"
         "-Werror=format",
         "-Wimplicit-int-conversion",
         "-Werror=vla",
+        "-g",
+        "-fsanitize=address",
     }
 
     filter {"system:macosx" }

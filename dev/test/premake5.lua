@@ -80,7 +80,11 @@ toolset "clang"
 targetdir "build/bin/%{cfg.buildcfg}"
 objdir "build/obj/%{cfg.buildcfg}"
 
-buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti"}
+buildoptions {"-Wall", "-fno-exceptions", "-fno-rtti", "-g", "-fsanitize=address"}
+
+linkoptions {
+        "-fsanitize=address",
+}
 
 includedirs {"./include", "../../include"}
 
