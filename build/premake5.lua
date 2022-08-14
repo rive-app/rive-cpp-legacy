@@ -92,6 +92,7 @@ project "rive"
         buildoptions {WINDOWS_CLANG_CL_SUPPRESSED_WARNINGS}
         staticruntime "on"  -- Match Skia's /MT flag for link compatibility
         runtime "Release"  -- Use /MT even in debug (/MTd is incompatible with Skia)
+        flags { "LinkTimeOptimization" }  -- Force premake to use llvm-ar instead of ar (ar is not part of clang-cl)
 
     filter {"system:ios", "options:variant=system" }
         buildoptions {"-mios-version-min=10.0 -fembed-bitcode -arch armv7 -arch arm64 -arch arm64e -isysroot " .. (os.getenv("IOS_SYSROOT") or "")}
