@@ -25,6 +25,8 @@ Core* NestedArtboard::clone() const {
 void NestedArtboard::nest(Artboard* artboard) {
     assert(artboard != nullptr);
 
+    printf("nest %p with %p isinst %d\n", this, artboard, artboard->isInstance());
+
     m_Artboard = artboard;
     if (!m_Artboard->isInstance()) {
         // We're just marking the source artboard so we can later instance from
@@ -94,6 +96,8 @@ StatusCode NestedArtboard::onAddedClean(CoreContext* context) {
     // artboard) when working with nested artboards, but in general this is good
     // practice for any loaded Rive file.
     assert(m_Artboard == nullptr || m_Artboard == m_Instance.get());
+
+    printf("onAddedClean %p with artboard %p inst %p\n", this, m_Artboard, m_Instance.get());
 
     if (m_Instance) {
         for (auto animation : m_NestedAnimations) {
