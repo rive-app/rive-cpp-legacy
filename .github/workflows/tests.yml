@@ -82,6 +82,7 @@ jobs:
         run: |
           ./build.sh
           ./build.sh release
+          cd ./tess/build/macosx && ./build_tess.sh clean
 
       - name: Tests
         if: matrix.platform == 'macOS'
