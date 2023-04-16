@@ -1,6 +1,6 @@
 #ifdef RIVE_RENDERER_TESS
 #include "viewer/tess/bitmap_decoder.hpp"
-#include <vector>
+#include <cstring>
 
 Bitmap::Bitmap(uint32_t width,
                uint32_t height,
@@ -41,7 +41,8 @@ using BitmapDecoder = std::unique_ptr<Bitmap> (*)(rive::Span<const uint8_t> byte
 struct ImageFormat
 {
     const char* name;
-    std::vector<const uint8_t> fingerprint;
+    uint8_t fingerprintSize;
+    uint8_t fingerprint[4];
     BitmapDecoder decodeImage;
 };
 
@@ -49,17 +50,17 @@ std::unique_ptr<Bitmap> Bitmap::decode(rive::Span<const uint8_t> bytes)
 {
     static ImageFormat decoders[] = {
         {
-            "png",
+            "png", 4,
             {0x89, 0x50, 0x4E, 0x47},
             DecodePng,
         },
         {
-            "jpeg",
+            "jpeg", 3,
             {0xFF, 0xD8, 0xFF},
             DecodeJpeg,
         },
         {
-            "webp",
+            "webp", 3,
             {0x52, 0x49, 0x46},
             DecodeWebP,
         },
@@ -71,14 +72,14 @@ std::unique_ptr<Bitmap> Bitmap::decode(rive::Span<const uint8_t> bytes)
 
         // Immediately discard decoders with fingerprints that are longer than
         // the file buffer.
-        if (recognizer.fingerprint.size() > bytes.size())
+        if (recognizer.fingerprintSize > bytes.size())
         {
             continue;
         }
 
         // If the fingerprint doesn't match, discrd this decoder. These are all bytes so .size() is
         // fine here.
-        if (std::memcmp(fingerprint.data(), bytes.data(), fingerprint.size()) != 0)
+        if (std::memcmp(recognizer.fingerprint, bytes.data(), recognizer.fingerprintSize) != 0)
         {
             continue;
         }

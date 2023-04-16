@@ -5,6 +5,7 @@
 #ifndef _RIVE_VIEWER_CONTENT_HPP_
 #define _RIVE_VIEWER_CONTENT_HPP_
 
+#include <vector>
 #include "rive/span.hpp"
 #include "rive/refcnt.hpp"
 
