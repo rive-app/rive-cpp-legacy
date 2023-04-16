@@ -131,7 +131,9 @@ static void event(const sapp_event* ev)
         case SAPP_EVENTTYPE_FILES_DROPPED:
         {
             // Do this to make sure the graphics is bound.
+#ifndef __linux
             bindGraphicsContext();
+#endif
 
             // get the number of files and their paths like this:
             const int numDroppedFiles = sapp_get_num_dropped_files();
