@@ -1,0 +1,1 @@
+../macosx/get_premake5.sh

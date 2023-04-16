@@ -15,10 +15,13 @@ if [ ! -d sokol ]; then
     echo "Cloning sokol."
     git clone $SOKOL_REPO
 
-    if [ $(arch) == arm64 ]; then
-        SOKOL_SHDC=https://github.com/floooh/sokol-tools-bin/raw/master/bin/osx_arm64/sokol-shdc
+    SOKOL_BIN=https://github.com/floooh/sokol-tools-bin/raw/master/bin
+    if [ $(uname -s) == Linux ]; then
+        SOKOL_SHDC=$SOKOL_BIN/linux/sokol-shdc
+    elif [ $(arch) == arm64 ]; then
+        SOKOL_SHDC=$SOKOL_BIN/osx_arm64/sokol-shdc
     else
-        SOKOL_SHDC=https://github.com/floooh/sokol-tools-bin/raw/master/bin/osx/sokol-shdc
+        SOKOL_SHDC=$SOKOL_BIN/osx/sokol-shdc
     fi
     curl $SOKOL_SHDC -L -o ./bin/sokol-shdc
     chmod +x ./bin/sokol-shdc
