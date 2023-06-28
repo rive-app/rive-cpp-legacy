@@ -68,6 +68,18 @@ do
     }
 
     filter {
+        'system:linux'
+    }
+    do
+        links {
+            'GL',
+            'Xcursor',
+            'Xi',
+            'X11'
+        }
+    end
+
+    filter {
         'system:macosx'
     }
     do

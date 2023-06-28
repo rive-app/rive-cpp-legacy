@@ -5,6 +5,7 @@
 #include "rive/shapes/paint/color.hpp"
 
 // Graphics and UI abstraction
+#define SOKOL_IMPL
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
@@ -130,7 +131,9 @@ static void event(const sapp_event* ev)
         case SAPP_EVENTTYPE_FILES_DROPPED:
         {
             // Do this to make sure the graphics is bound.
+#ifndef __linux
             bindGraphicsContext();
+#endif
 
             // get the number of files and their paths like this:
             const int numDroppedFiles = sapp_get_num_dropped_files();
