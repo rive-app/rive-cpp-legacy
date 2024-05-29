@@ -2,6 +2,8 @@
 // https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/example.c
 #include "rive/decoders/bitmap_decoder.hpp"
 
+#include "stdio.h"
+
 #include "jpeglib.h"
 #include "jerror.h"
 
