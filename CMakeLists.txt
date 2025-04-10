@@ -31,7 +31,7 @@ FetchContent_MakeAvailable(harfbuzz)
 FetchContent_Declare(
     sheenbidi
     GIT_REPOSITORY https://github.com/Tehreer/SheenBidi.git
-    GIT_TAG v4.1.1
+    #GIT_TAG v4.1.1
 )
 FetchContent_MakeAvailable(sheenbidi)
 
